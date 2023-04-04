@@ -2,22 +2,30 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/zhayt/user-storage-service/internal/common"
 	"github.com/zhayt/user-storage-service/internal/model"
 	"github.com/zhayt/user-storage-service/logger"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 const _timeoutContext = 5 * time.Second
 
+const (
+	responseUserSave   = "User Saved"
+	responseUserUpdate = "User Updated"
+	responseUserDelete = "User Deleted"
+)
+
 type IUser interface {
-	GetUserByName(name string) (model.User, error)
-	GetAllUsers() ([]*model.User, error)
-	CreateUser(user model.User) (string, error)
-	UpdateUser(name string, user model.User) error
-	DeleteUser(name string) (model.User, error)
+	GetUserById(id int) (model.User, error)
+	GetAllUsers() ([]model.User, error)
+	CreateUser(user model.User) (int, error)
+	UpdateUser(id int, user model.User) error
+	DeleteUser(id int) error
 }
 
 type Handler struct {
@@ -43,7 +51,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name, err := h.user.CreateUser(*user)
+	id, err := h.user.CreateUser(*user)
 	if err != nil {
 		if errors.Is(err, common.ErrInvalidData) {
 			h.clientError(w, http.StatusBadRequest)
@@ -58,13 +66,27 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("User saved: " + name))
+	response := model.Response{
+		Message: fmt.Sprintf("%v: #%v", responseUserSave, id),
+	}
+
+	json, err := h.formatToJSON(response)
+	if err != nil {
+		h.serverError(w, err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
 }
 
 func (h *Handler) showUser(w http.ResponseWriter, r *http.Request) {
-	name := httprouter.ParamsFromContext(r.Context()).ByName("name")
+	id, err := strconv.Atoi(httprouter.ParamsFromContext(r.Context()).ByName("id"))
+	if err != nil {
+		h.clientError(w, http.StatusBadRequest)
+		return
+	}
 
-	user, err := h.user.GetUserByName(name)
+	user, err := h.user.GetUserById(id)
 	if err != nil {
 		h.notFound(w)
 		return
@@ -87,30 +109,27 @@ func (h *Handler) showAllUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsons := make([]byte, 0, len(users))
-
-	for _, user := range users {
-		json, err := h.formatToJSON(*user)
-		if err != nil {
-			h.serverError(w, err)
-			return
-		}
-
-		jsons = append(jsons, json...)
-		jsons = append(jsons, '\n')
+	json, err := h.formatToJSON(users)
+	if err != nil {
+		h.serverError(w, err)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsons)
+	w.Write(json)
 }
 
 func (h *Handler) updateCreateUser(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	id, err := strconv.Atoi(httprouter.ParamsFromContext(r.Context()).ByName("id"))
+	if err != nil {
 		h.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	name := httprouter.ParamsFromContext(r.Context()).ByName("name")
+	if err := r.ParseForm(); err != nil {
+		h.clientError(w, http.StatusBadRequest)
+		return
+	}
 
 	user, err := h.getUserDate(r)
 	if err != nil {
@@ -118,26 +137,39 @@ func (h *Handler) updateCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = h.user.UpdateUser(name, *user); err != nil {
+	if err = h.user.UpdateUser(id, *user); err != nil {
 		if errors.Is(err, common.ErrInvalidData) {
 			h.clientError(w, http.StatusBadRequest)
 			return
 		}
 
-		name, _ = h.user.CreateUser(*user)
+		id, _ = h.user.CreateUser(*user)
 
 	}
 
-	w.Write([]byte(name + " updated"))
+	response := model.Response{
+		Message: fmt.Sprintf("%v: #%v", responseUserUpdate, id),
+	}
+	json, err := h.formatToJSON(response)
+	if err != nil {
+		h.serverError(w, err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
 }
 
 func (h *Handler) updateUser(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	id, err := strconv.Atoi(httprouter.ParamsFromContext(r.Context()).ByName("id"))
+	if err != nil {
 		h.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	name := httprouter.ParamsFromContext(r.Context()).ByName("name")
+	if err := r.ParseForm(); err != nil {
+		h.clientError(w, http.StatusBadRequest)
+		return
+	}
 
 	user, err := h.getUserDate(r)
 	if err != nil {
@@ -145,7 +177,7 @@ func (h *Handler) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = h.user.UpdateUser(name, *user); err != nil {
+	if err = h.user.UpdateUser(id, *user); err != nil {
 		if errors.Is(err, common.ErrUserNotExists) {
 			h.clientError(w, http.StatusBadRequest)
 			return
@@ -155,13 +187,26 @@ func (h *Handler) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(name + "user updated"))
+	response := model.Response{
+		Message: fmt.Sprintf("%v: #%v", responseUserUpdate, id),
+	}
+	json, err := h.formatToJSON(response)
+	if err != nil {
+		h.serverError(w, err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
 }
 
 func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
-	name := httprouter.ParamsFromContext(r.Context()).ByName("name")
+	id, err := strconv.Atoi(httprouter.ParamsFromContext(r.Context()).ByName("id"))
+	if err != nil {
+		h.clientError(w, http.StatusBadRequest)
+		return
+	}
 
-	user, err := h.user.DeleteUser(name)
+	err = h.user.DeleteUser(id)
 	if err != nil {
 		if errors.Is(err, common.ErrUserNotExists) {
 			h.notFound(w)
@@ -171,10 +216,12 @@ func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, err)
 	}
 
-	json, err := h.formatToJSON(user)
+	response := model.Response{
+		Message: fmt.Sprintf("%v: #%v", responseUserDelete, id),
+	}
+	json, err := h.formatToJSON(response)
 	if err != nil {
 		h.serverError(w, err)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
