@@ -11,7 +11,7 @@ import (
 type IUserService interface {
 	GetUserByName(name string) (model.User, error)
 	GetAllUsers() ([]*model.User, error)
-	CreateUser(name string, user model.User) (string, error)
+	CreateUser(user model.User) (string, error)
 	UpdateUser(name string, user model.User) error
 	DeleteUser(name string) (model.User, error)
 }
@@ -33,7 +33,7 @@ func (s *UserService) GetAllUsers() ([]*model.User, error) {
 }
 
 func (s *UserService) CreateUser(user model.User) (string, error) {
-	if err := checkDate(3, 20, user.FirstName, user.LastName, user.Fatherland, user.PasswordHash); err != nil {
+	if err := checkDate(3, 50, user.FIO, user.PasswordHash); err != nil {
 		return "", err
 	}
 
@@ -43,18 +43,14 @@ func (s *UserService) CreateUser(user model.User) (string, error) {
 
 	// generate password hash
 
-	user.FirstName = strings.TrimSpace(user.FirstName)
-	user.LastName = strings.TrimSpace(user.LastName)
-	user.Fatherland = strings.TrimSpace(user.Fatherland)
+	user.FIO = strings.TrimSpace(user.FIO)
 	user.PasswordHash = strings.TrimSpace(user.PasswordHash)
 
-	name := strings.ToLower(user.FirstName + user.LastName)
-
-	return s.User.CreateUser(name, user)
+	return s.User.CreateUser(user)
 }
 
 func (s *UserService) UpdateUser(name string, user model.User) error {
-	if err := checkDate(3, 20, user.FirstName, user.LastName, user.Fatherland, user.PasswordHash); err != nil {
+	if err := checkDate(3, 50, user.FIO, user.PasswordHash); err != nil {
 		return err
 	}
 
@@ -64,9 +60,7 @@ func (s *UserService) UpdateUser(name string, user model.User) error {
 
 	// generate password hash
 
-	user.FirstName = strings.TrimSpace(user.FirstName)
-	user.LastName = strings.TrimSpace(user.LastName)
-	user.Fatherland = strings.TrimSpace(user.Fatherland)
+	user.FIO = strings.TrimSpace(user.FIO)
 	user.PasswordHash = strings.TrimSpace(user.PasswordHash)
 
 	return s.User.UpdateUser(name, user)
