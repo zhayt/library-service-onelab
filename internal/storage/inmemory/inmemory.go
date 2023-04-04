@@ -8,7 +8,7 @@ import (
 )
 
 type UserStorage struct {
-	mu      sync.Mutex
+	mu      sync.RWMutex
 	id      int
 	storage map[int]model.User
 }
@@ -20,8 +20,8 @@ func NewUserStorage() *UserStorage {
 }
 
 func (r *UserStorage) GetUserById(id int) (model.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	user, ok := r.storage[id]
 	if !ok {
 		return user, fmt.Errorf("cannot take user: %w", common.ErrUserNotExists)
@@ -31,8 +31,8 @@ func (r *UserStorage) GetUserById(id int) (model.User, error) {
 }
 
 func (r *UserStorage) GetAllUsers() ([]model.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	users := make([]model.User, 0, len(r.storage))
 	for _, user := range r.storage {
 		users = append(users, user)
