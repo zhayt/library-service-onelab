@@ -209,7 +209,7 @@ func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
 	err = h.user.DeleteUser(id)
 	if err != nil {
 		if errors.Is(err, common.ErrUserNotExists) {
-			h.notFound(w)
+			h.clientError(w, http.StatusBadRequest)
 			return
 		}
 
