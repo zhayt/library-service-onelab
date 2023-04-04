@@ -6,5 +6,5 @@
 
 # how to run
 ```shell
-go run cmd/main.go
+make run
 ```
