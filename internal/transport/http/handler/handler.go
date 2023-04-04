@@ -53,11 +53,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 
 	id, err := h.user.CreateUser(*user)
 	if err != nil {
-		if errors.Is(err, common.ErrInvalidData) {
-			h.clientError(w, http.StatusBadRequest)
-			return
-		}
-		if errors.Is(err, common.ErrNameTaken) {
+		if errors.Is(err, common.ErrInvalidData) || errors.Is(err, common.ErrNameTaken) {
 			h.clientError(w, http.StatusBadRequest)
 			return
 		}
@@ -190,6 +186,7 @@ func (h *Handler) updateUser(w http.ResponseWriter, r *http.Request) {
 	response := model.Response{
 		Message: fmt.Sprintf("%v: #%v", responseUserUpdate, id),
 	}
+
 	json, err := h.formatToJSON(response)
 	if err != nil {
 		h.serverError(w, err)
@@ -219,6 +216,7 @@ func (h *Handler) deleteUser(w http.ResponseWriter, r *http.Request) {
 	response := model.Response{
 		Message: fmt.Sprintf("%v: #%v", responseUserDelete, id),
 	}
+
 	json, err := h.formatToJSON(response)
 	if err != nil {
 		h.serverError(w, err)
