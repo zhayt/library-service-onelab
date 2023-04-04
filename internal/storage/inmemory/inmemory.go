@@ -30,12 +30,12 @@ func (r *UserStorage) GetUserById(id int) (model.User, error) {
 	return user, nil
 }
 
-func (r *UserStorage) GetAllUsers() ([]*model.User, error) {
+func (r *UserStorage) GetAllUsers() ([]model.User, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	users := make([]*model.User, 0, len(r.storage))
+	users := make([]model.User, 0, len(r.storage))
 	for _, user := range r.storage {
-		users = append(users, &user)
+		users = append(users, user)
 	}
 
 	return users, nil
@@ -67,15 +67,14 @@ func (r *UserStorage) UpdateUser(id int, user model.User) error {
 	return nil
 }
 
-func (r *UserStorage) DeleteUser(id int) (model.User, error) {
+func (r *UserStorage) DeleteUser(id int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	user, ok := r.storage[id]
-	if !ok {
-		return user, fmt.Errorf("cannot delete user: %w", common.ErrUserNotExists)
+	if _, ok := r.storage[id]; !ok {
+		return fmt.Errorf("cannot delete user: %w", common.ErrUserNotExists)
 	}
 
 	delete(r.storage, id)
-	return user, nil
+	return nil
 }
