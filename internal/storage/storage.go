@@ -7,10 +7,10 @@ import (
 
 type IUserStorage interface {
 	GetUserById(id int) (model.User, error)
-	GetAllUsers() ([]*model.User, error)
+	GetAllUsers() ([]model.User, error)
 	CreateUser(user model.User) (int, error)
 	UpdateUser(id int, user model.User) error
-	DeleteUser(id int) (model.User, error)
+	DeleteUser(id int) error
 }
 
 type Storage struct {
