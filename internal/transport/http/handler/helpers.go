@@ -49,7 +49,7 @@ func (h *Handler) getUserDate(r *http.Request) (*model.User, error) {
 	return user, nil
 }
 
-func (h *Handler) formatToJSON(user model.User) ([]byte, error) {
+func (h *Handler) formatToJSON(user interface{}) ([]byte, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	js, err := json.Marshal(user)
 	if err != nil {
