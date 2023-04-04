@@ -10,10 +10,10 @@ import (
 
 type IUserService interface {
 	GetUserById(id int) (model.User, error)
-	GetAllUsers() ([]*model.User, error)
+	GetAllUsers() ([]model.User, error)
 	CreateUser(user model.User) (int, error)
 	UpdateUser(id int, user model.User) error
-	DeleteUser(id int) (model.User, error)
+	DeleteUser(id int) error
 }
 
 type UserService struct {
@@ -28,7 +28,7 @@ func (s *UserService) GetUserById(id int) (model.User, error) {
 	return s.User.GetUserById(id)
 }
 
-func (s *UserService) GetAllUsers() ([]*model.User, error) {
+func (s *UserService) GetAllUsers() ([]model.User, error) {
 	return s.User.GetAllUsers()
 }
 
@@ -66,7 +66,7 @@ func (s *UserService) UpdateUser(id int, user model.User) error {
 	return s.User.UpdateUser(id, user)
 }
 
-func (s *UserService) DeleteUser(id int) (model.User, error) {
+func (s *UserService) DeleteUser(id int) error {
 	return s.User.DeleteUser(id)
 }
 
