@@ -9,11 +9,11 @@ import (
 )
 
 type IUserService interface {
-	GetUserByName(name string) (model.User, error)
+	GetUserById(id int) (model.User, error)
 	GetAllUsers() ([]*model.User, error)
-	CreateUser(user model.User) (string, error)
-	UpdateUser(name string, user model.User) error
-	DeleteUser(name string) (model.User, error)
+	CreateUser(user model.User) (int, error)
+	UpdateUser(id int, user model.User) error
+	DeleteUser(id int) (model.User, error)
 }
 
 type UserService struct {
@@ -24,21 +24,21 @@ func NewUserService(user IUserService) *UserService {
 	return &UserService{User: user}
 }
 
-func (s *UserService) GetUserByName(email string) (model.User, error) {
-	return s.User.GetUserByName(email)
+func (s *UserService) GetUserById(id int) (model.User, error) {
+	return s.User.GetUserById(id)
 }
 
 func (s *UserService) GetAllUsers() ([]*model.User, error) {
 	return s.User.GetAllUsers()
 }
 
-func (s *UserService) CreateUser(user model.User) (string, error) {
+func (s *UserService) CreateUser(user model.User) (int, error) {
 	if err := checkDate(3, 50, user.FIO, user.PasswordHash); err != nil {
-		return "", err
+		return 0, err
 	}
 
 	if err := matchesPattern(user.Email, common.EmailRX); err != nil {
-		return "", err
+		return 0, err
 	}
 
 	// generate password hash
@@ -49,7 +49,7 @@ func (s *UserService) CreateUser(user model.User) (string, error) {
 	return s.User.CreateUser(user)
 }
 
-func (s *UserService) UpdateUser(name string, user model.User) error {
+func (s *UserService) UpdateUser(id int, user model.User) error {
 	if err := checkDate(3, 50, user.FIO, user.PasswordHash); err != nil {
 		return err
 	}
@@ -63,11 +63,11 @@ func (s *UserService) UpdateUser(name string, user model.User) error {
 	user.FIO = strings.TrimSpace(user.FIO)
 	user.PasswordHash = strings.TrimSpace(user.PasswordHash)
 
-	return s.User.UpdateUser(name, user)
+	return s.User.UpdateUser(id, user)
 }
 
-func (s *UserService) DeleteUser(name string) (model.User, error) {
-	return s.User.DeleteUser(name)
+func (s *UserService) DeleteUser(id int) (model.User, error) {
+	return s.User.DeleteUser(id)
 }
 
 func checkDate(minLen, maxLen int, data ...string) error {
