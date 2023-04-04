@@ -6,11 +6,11 @@ import (
 )
 
 type IUserStorage interface {
-	GetUserByName(name string) (model.User, error)
+	GetUserById(id int) (model.User, error)
 	GetAllUsers() ([]*model.User, error)
-	CreateUser(name string, user model.User) (string, error)
-	UpdateUser(name string, user model.User) error
-	DeleteUser(name string) (model.User, error)
+	CreateUser(user model.User) (int, error)
+	UpdateUser(id int, user model.User) error
+	DeleteUser(id int) (model.User, error)
 }
 
 type Storage struct {
