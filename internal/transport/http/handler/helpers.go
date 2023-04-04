@@ -5,7 +5,6 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/zhayt/user-storage-service/internal/common"
 	"github.com/zhayt/user-storage-service/internal/model"
-	"log"
 	"net/http"
 	"runtime/debug"
 )
@@ -26,40 +25,23 @@ func (h *Handler) notFound(w http.ResponseWriter) {
 }
 
 func (h *Handler) getUserDate(r *http.Request) (*model.User, error) {
-	firstname, ok := r.Form["firstname"]
+	fio, ok := r.Form["fio"]
 	if !ok {
-		log.Println("1")
-		return nil, common.ErrEmptyField
-	}
-
-	lastname, ok := r.Form["lastname"]
-	if !ok {
-		log.Println("2")
-		return nil, common.ErrEmptyField
-	}
-
-	fatherland, ok := r.Form["fatherland"]
-	if !ok {
-		log.Println("3")
-		return nil, common.ErrEmptyField
+		return nil, fmt.Errorf("%w: field fio", common.ErrEmptyField)
 	}
 
 	email, ok := r.Form["email"]
 	if !ok {
-		log.Println("4")
-		return nil, common.ErrEmptyField
+		return nil, fmt.Errorf("%w: field email", common.ErrEmptyField)
 	}
 
 	password, ok := r.Form["password"]
 	if !ok {
-		log.Println("5")
-		return nil, common.ErrEmptyField
+		return nil, fmt.Errorf("%w: field password", common.ErrEmptyField)
 	}
 
 	user := &model.User{
-		FirstName:    firstname[0],
-		LastName:     lastname[0],
-		Fatherland:   fatherland[0],
+		FIO:          fio[0],
 		Email:        email[0],
 		PasswordHash: password[0],
 	}
