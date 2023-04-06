@@ -21,11 +21,11 @@ type (
 )
 
 func New() (*Config, error) {
-	cfg := &Config{}
-	if err := cleanenv.ReadEnv(cfg); err != nil {
+	var cfg Config
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		return nil, fmt.Errorf("cannot read config: %w", err)
 	}
 
-	return cfg, nil
+	return &cfg, nil
 
 }
