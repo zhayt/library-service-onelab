@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/caarlos0/env/v8"
 )
 
 type (
@@ -12,20 +12,20 @@ type (
 	}
 
 	HTTP struct {
-		Port string `env:"PORT" env-default:"8080"`
+		Port string `env:"APP_PORT" envDefault:"8080"`
 	}
 
 	Log struct {
-		Level string `env:"LOG_LEVEL" env-default:"Dev"`
+		Level string `env:"LOG_LEVEL" envDefault:"Dev"`
 	}
 )
 
 func New() (*Config, error) {
 	var cfg Config
-	if err := cleanenv.ReadEnv(&cfg); err != nil {
+
+	if err := env.Parse(&cfg); err != nil {
 		return nil, fmt.Errorf("cannot read config: %w", err)
 	}
 
 	return &cfg, nil
-
 }

@@ -2,18 +2,32 @@ package app
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/zhayt/user-storage-service/config"
 	"github.com/zhayt/user-storage-service/internal/service"
 	"github.com/zhayt/user-storage-service/internal/storage"
 	"github.com/zhayt/user-storage-service/internal/transport/http"
 	"github.com/zhayt/user-storage-service/internal/transport/http/handler"
 	logger2 "github.com/zhayt/user-storage-service/logger"
+	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
+func prepareEnv() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func Run() error {
+	var once sync.Once
+
+	once.Do(prepareEnv)
+
 	logger := logger2.NewLogger()
 	cfg, err := config.New()
 	if err != nil {
