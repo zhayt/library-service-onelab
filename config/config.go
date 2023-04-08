@@ -11,7 +11,7 @@ type (
 		Log
 	}
 
-	HTTP struct {
+	HTTP struct { // Зачем делать структуры только для 1 элемента 
 		Port string `env:"APP_PORT" envDefault:"8080"`
 	}
 

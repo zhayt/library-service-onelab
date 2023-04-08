@@ -1,7 +1,7 @@
 package common
 
 import "errors"
-
+// зачем этот пакет ?
 var (
 	ErrInvalidData   = errors.New("invalid data")
 	ErrNameTaken     = errors.New("name taken")

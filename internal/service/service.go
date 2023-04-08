@@ -20,6 +20,7 @@ type UserService struct {
 	User IUserService
 }
 
+// Ты принимаешь и отдаешь одну и ту же структуру / интерфейс ? тут правильнее будет использовать IUserStorage
 func NewUserService(user IUserService) *UserService {
 	return &UserService{User: user}
 }

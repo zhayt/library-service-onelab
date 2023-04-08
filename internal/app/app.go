@@ -15,14 +15,14 @@ import (
 	"sync"
 	"syscall"
 )
-
+// если ты взаимодействуешь с конфигами, это нужно хранить в пакете конфигов
 func prepareEnv() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
-
+// это должно быть в мейн 
 func Run() error {
 	var once sync.Once
 
@@ -33,7 +33,7 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-
+// зависимости правильные
 	repo := storage.NewStorage()
 
 	serv := service.NewUserService(repo)
