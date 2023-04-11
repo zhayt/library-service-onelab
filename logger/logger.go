@@ -1,21 +1,15 @@
 package logger
 
 import (
-	"log"
-	"os"
+	"github.com/zhayt/user-storage-service/config"
+	"go.uber.org/zap"
 )
 
-type Logger struct {
-	LogInfo  *log.Logger
-	LogError *log.Logger
-}
-
-func NewLogger() *Logger {
-	infoLog := log.New(os.Stdout, "\033[34m[INFO]\033[0m\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stderr, "\033[31m[ERROR]\033[0m\t", log.Ldate|log.Ltime|log.Lshortfile)
-
-	return &Logger{
-		LogInfo:  infoLog,
-		LogError: errorLog,
+func Init(cfg *config.Config) (*zap.Logger, error) {
+	switch cfg.Level {
+	case "dev":
+		return zap.NewDevelopment()
+	default:
+		return zap.NewProduction()
 	}
 }
