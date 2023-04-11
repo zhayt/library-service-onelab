@@ -1,0 +1,34 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_DB: "onelab_db"
+      POSTGRES_USER: "onelab"
+      POSTGRES_PASSWORD: "qwerty"
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+  migration:
+    image: migrate/migrate
+    command: -path ./internal/storage/postgres/migrations/ -database 'postgres://onelab:qwerty@localhost:5432/onelab_db?sslmode=disable' up
+    depends_on:
+      - postgres
+
+  app:
+    build: ./user-storage-servise/
+    restart: always
+    environment:
+      APP_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
