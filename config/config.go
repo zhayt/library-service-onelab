@@ -3,20 +3,29 @@ package config
 import (
 	"fmt"
 	"github.com/caarlos0/env/v8"
+	"github.com/joho/godotenv"
+	"log"
 )
 
 type (
 	Config struct {
 		HTTP
-		Log
+		Database
+		JWTKey string `env:"JWT_KEY" envDefault:"supersecret"`
+		Level  string `env:"APP_MODE" envDefault:"dev"`
 	}
 
 	HTTP struct {
-		Port string `env:"APP_PORT" envDefault:"8080"`
+		AppHost string `env:"APP_HOST" envDefault:"localhost"`
+		AppPort string `env:"APP_PORT" envDefault:"8080"`
 	}
 
-	Log struct {
-		Level string `env:"LOG_LEVEL" envDefault:"Dev"`
+	Database struct {
+		DBHost     string `env:"PG_HOST" envDefault:"localhost"`
+		DBPort     string `env:"PG_PORT" envDefault:"5432"`
+		DBUser     string `env:"PG_USER" envDefault:"onelab"`
+		DBName     string `env:"PG_NAME" envDefault:"onelab_db"`
+		DBPassword string `env:"PG_PASSWORD"`
 	}
 )
 
@@ -28,4 +37,11 @@ func New() (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func PrepareEnv() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
