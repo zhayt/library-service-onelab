@@ -1,6 +1,7 @@
 package inmemory
 
 import (
+	"context"
 	"fmt"
 	"github.com/zhayt/user-storage-service/internal/common"
 	"github.com/zhayt/user-storage-service/internal/model"
@@ -19,7 +20,7 @@ func NewUserStorage() *UserStorage {
 	}
 }
 
-func (r *UserStorage) GetUserById(id int) (model.User, error) {
+func (r *UserStorage) GetUserById(ctx context.Context, id int) (model.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	user, ok := r.storage[id]
@@ -30,7 +31,7 @@ func (r *UserStorage) GetUserById(id int) (model.User, error) {
 	return user, nil
 }
 
-func (r *UserStorage) GetAllUsers() ([]model.User, error) {
+func (r *UserStorage) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	users := make([]model.User, 0, len(r.storage))
@@ -41,7 +42,7 @@ func (r *UserStorage) GetAllUsers() ([]model.User, error) {
 	return users, nil
 }
 
-func (r *UserStorage) CreateUser(user model.User) (int, error) {
+func (r *UserStorage) CreateUser(ctx context.Context, user model.User) (int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.id++
@@ -54,20 +55,20 @@ func (r *UserStorage) CreateUser(user model.User) (int, error) {
 	return r.id, nil
 }
 
-func (r *UserStorage) UpdateUser(id int, user model.User) error {
+func (r *UserStorage) UpdateUser(ctx context.Context, user model.User) (int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, ok := r.storage[id]; !ok {
-		return fmt.Errorf("cannot update user: %w", common.ErrUserNotExists)
+	if _, ok := r.storage[user.ID]; !ok {
+		return 0, fmt.Errorf("cannot update user: %w", common.ErrUserNotExists)
 	}
 
-	r.storage[id] = user
+	r.storage[user.ID] = user
 
-	return nil
+	return user.ID, nil
 }
 
-func (r *UserStorage) DeleteUser(id int) error {
+func (r *UserStorage) DeleteUser(ctx context.Context, id int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
