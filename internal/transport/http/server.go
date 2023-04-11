@@ -2,46 +2,55 @@ package http
 
 import (
 	"context"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/zhayt/user-storage-service/config"
+	"github.com/zhayt/user-storage-service/internal/transport/http/handler"
+	middleware2 "github.com/zhayt/user-storage-service/internal/transport/http/middleware"
 	"net"
-	"net/http"
 	"time"
 )
 
 const (
-	_defaultReadTimeout     = 5 * time.Second
-	_defaultWriteTimeout    = 10 * time.Second
 	_defaultShutdownTimeout = 3 * time.Second
 )
 
 type Server struct {
-	Server          *http.Server
+	App             *echo.Echo
+	cfg             *config.Config
+	handler         *handler.Handler
+	mid             *middleware2.JWTAuth
 	notify          chan error
 	shutdownTimeout time.Duration
 }
 
-func NewServer(cfg *config.Config, router http.Handler) *Server {
-	httpSrv := &http.Server{
-		Addr: net.JoinHostPort("", cfg.Port),
-
-		Handler: router,
-
-		ReadTimeout:  _defaultReadTimeout,
-		WriteTimeout: _defaultWriteTimeout,
-	}
-
+func NewServer(cfg *config.Config, handler *handler.Handler, mid *middleware2.JWTAuth) *Server {
 	srv := &Server{
-		Server:          httpSrv,
+		cfg:             cfg,
+		handler:         handler,
 		shutdownTimeout: _defaultShutdownTimeout,
 		notify:          make(chan error, 1),
+		mid:             mid,
 	}
 
 	return srv
 }
 
+func (s *Server) BuildingEngine() *echo.Echo {
+	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{"*"},
+	}))
+
+	return e
+}
+
 func (s *Server) Start() {
+	s.App = s.BuildingEngine()
+	s.SetUpRoute()
 	go func() {
-		s.notify <- s.Server.ListenAndServe()
+		s.notify <- s.App.Start(net.JoinHostPort(s.cfg.AppHost, s.cfg.AppPort))
 		close(s.notify)
 	}()
 }
@@ -53,5 +62,5 @@ func (s *Server) Notify() <-chan error {
 func (s *Server) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 	defer cancel()
-	return s.Server.Shutdown(ctx)
+	return s.App.Shutdown(ctx)
 }
