@@ -48,7 +48,7 @@ func run() error {
 	}(l)
 
 	// storage
-	db, err := postgres.NewConnectionPool("pgx", makeURL(cfg))
+	db, err := postgres.NewConnectionPool("pgx", cfg.DBConnectionURL)
 	if err != nil {
 		return err
 	}
@@ -90,9 +90,4 @@ func run() error {
 	}
 
 	return nil
-}
-
-func makeURL(cfg *config.Config) string {
-	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
-		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
 }

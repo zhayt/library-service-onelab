@@ -11,8 +11,9 @@ type (
 	Config struct {
 		HTTP
 		Database
-		JWTKey string `env:"JWT_KEY" envDefault:"supersecret"`
-		Level  string `env:"APP_MODE" envDefault:"dev"`
+		JWTKey          string `env:"JWT_KEY" envDefault:"supersecret"`
+		Level           string `env:"APP_MODE" envDefault:"dev"`
+		DBConnectionURL string
 	}
 
 	HTTP struct {
@@ -36,6 +37,7 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("cannot read config: %w", err)
 	}
 
+	cfg.DBConnectionURL = makeURL(&cfg)
 	return &cfg, nil
 }
 
@@ -44,4 +46,9 @@ func PrepareEnv() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func makeURL(cfg *Config) string {
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
+		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
 }
