@@ -58,18 +58,18 @@ func (r *UserStorage) CreateUser(ctx context.Context, user model.User) (int, err
 }
 
 func (r *UserStorage) UpdateUserFIO(ctx context.Context, user model.UserUpdateFIO) (int, error) {
-	qr := `UPDATE "user" SET fio = $2 WHERE id = $1`
+	qr := `UPDATE "user" SET fio = $2 WHERE id = $1 RETURNING id`
 
 	var userID int64
 	if err := r.db.GetContext(ctx, &userID, qr, user.ID, user.FIO); err != nil {
-		return 0, fmt.Errorf("cannot update user: %w", err)
+		return 0, fmt.Errorf("cannot update user id#%v: %w", user.ID, err)
 	}
 
 	return int(userID), nil
 }
 
 func (r *UserStorage) UpdateUserPassword(ctx context.Context, user model.UserUpdatePassword) (int, error) {
-	qr := `UPDATE "user" SET password = $2 WHERE id = $1`
+	qr := `UPDATE "user" SET password = $2 WHERE id = $1 RETURNING id`
 
 	var userID int64
 	if err := r.db.GetContext(ctx, &userID, qr, user.ID, user.NewPassword); err != nil {
