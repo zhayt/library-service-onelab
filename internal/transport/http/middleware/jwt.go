@@ -69,7 +69,7 @@ func (m *JWTAuth) ValidateAuth(next echo.HandlerFunc) echo.HandlerFunc {
 				return echo.NewHTTPError(403, err.Error())
 			}
 
-			ctx := context.WithValue(e.Request().Context(), model.ContextUserID, claims.Username)
+			ctx := context.WithValue(e.Request().Context(), model.ContextUserID, claims.UserID)
 			e.SetRequest(e.Request().WithContext(ctx))
 		}
 
