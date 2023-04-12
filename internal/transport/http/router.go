@@ -13,13 +13,14 @@ func (s *Server) SetUpRoute() {
 	})
 
 	user := v1.Group("/users")
-	user.POST("/sign-up", s.handler.CreateUser)
-	user.POST("/sign-in", s.handler.GetUser)
+	user.POST("/sign-up", s.handler.SignUp)
+	user.POST("/sign-in", s.handler.SignIn)
+	user.GET("/:id", s.handler.ShowUser)
 
 	setting := user.Group("/settings", s.mid.ValidateAuth)
-	setting.POST("/profile", s.handler.UpdateUser)
+	setting.PATCH("/profile", s.handler.UpdateUser)
+	setting.PATCH("/password", s.handler.UpdateUserPassword)
 	setting.DELETE("/profile", s.handler.DeleteUser)
-	setting.POST("/password", s.handler.UpdateUserPassword)
 
 	book := v1.Group("/books")
 	book.POST("/", s.handler.CreateBook)
