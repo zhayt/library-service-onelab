@@ -1,7 +1,5 @@
 package model
 
-const ContextUserID = "userID"
-
 type User struct {
 	ID       int    `json:"id"`
 	FIO      string `json:"fio"`
@@ -25,3 +23,7 @@ type UserUpdatePassword struct {
 	NewPassword       string `json:"newPassword"`
 	NewPasswordRepeat string `json:"newPasswordRepeat"`
 }
+
+type contextKey string
+
+const ContextUserID = contextKey("userID")
