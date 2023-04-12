@@ -68,13 +68,10 @@ func run() error {
 	// server
 	server := http.NewServer(cfg, hand, mid)
 
-	l.Info("app started")
+	l.Info("Start server", zap.String("host", cfg.AppHost), zap.String("port", cfg.AppPort))
+	server.Start()
 
-	go func() {
-		l.Info("Start server", zap.String("host", cfg.AppHost), zap.String("port", cfg.AppPort))
-		server.Start()
-	}()
-
+	// grace full shutdown
 	osSignCh := make(chan os.Signal, 1)
 	signal.Notify(osSignCh, syscall.SIGINT, syscall.SIGTERM)
 
