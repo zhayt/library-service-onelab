@@ -72,8 +72,8 @@ func (h *Handler) ShowAllBooks(e echo.Context) error {
 		return e.JSON(http.StatusInternalServerError, err)
 	}
 
-func (h *Handler) ShowBooks(e echo.Context) error {
-	return nil
+	h.log.Info("Books founded", zap.Int("amount", len(books)))
+	return e.JSON(http.StatusOK, books)
 }
 
 func (h *Handler) UpdateBook(e echo.Context) error {
@@ -106,5 +106,20 @@ func (h *Handler) UpdateBook(e echo.Context) error {
 }
 
 func (h *Handler) DeleteBook(e echo.Context) error {
-	return nil
+	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
+	defer cancel()
+
+	bookID, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		h.log.Error("Param error", zap.Error(err))
+		return e.JSON(http.StatusNotFound, err)
+	}
+
+	if err = h.book.DeleteBook(ctx, bookID); err != nil {
+		h.log.Error("Delete book error", zap.Error(err))
+		return e.JSON(http.StatusInternalServerError, err)
+	}
+
+	h.log.Info("Book deleted", zap.Int("id", bookID))
+	return e.JSON(http.StatusOK, bookID)
 }
