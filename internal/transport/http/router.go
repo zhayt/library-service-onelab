@@ -28,4 +28,11 @@ func (s *Server) SetUpRoute() {
 	book.GET("/:id", s.handler.ShowBook)
 	book.PATCH("/:id", s.handler.UpdateBook)
 	book.DELETE("/:id", s.handler.DeleteBook)
+
+	history := v1.Group("/rents")
+	history.POST("", s.handler.CreateBIHistory, s.mid.ValidateAuth)
+	history.GET("", s.handler.ShowCurrentBorrowedBooks)
+	history.GET("/months", s.handler.ShowBIHistoryLastMonth)
+	history.PATCH("/:id", s.handler.UpdateBIHistory)
+	history.DELETE("/:id", s.handler.DeleteBIHistory)
 }
