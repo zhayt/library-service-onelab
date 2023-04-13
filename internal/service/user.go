@@ -15,7 +15,7 @@ import (
 )
 
 type IUserStorage interface {
-	GetUserById(ctx context.Context, userID int) (model.User, error)
+	GetUserByID(ctx context.Context, userID int) (model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 
 	CreateUser(ctx context.Context, user model.User) (int, error)
@@ -35,8 +35,8 @@ func NewUserService(logger *zap.Logger, user IUserStorage) *UserService {
 	return &UserService{log: logger, user: user}
 }
 
-func (s *UserService) GetUserById(ctx context.Context, userId int) (model.User, error) {
-	return s.user.GetUserById(ctx, userId)
+func (s *UserService) GetUserByID(ctx context.Context, userId int) (model.User, error) {
+	return s.user.GetUserByID(ctx, userId)
 }
 
 func (s *UserService) GetUserByEmail(ctx context.Context, login model.UserLogin) (model.User, error) {
@@ -52,33 +52,31 @@ func (s *UserService) GetUserByEmail(ctx context.Context, login model.UserLogin)
 	return user, nil
 }
 
-func (s *UserService) CreateUser(ctx context.Context, user model.User) (model.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, user model.User) (int, error) {
 	if err := checkDate(3, 50, user.FIO, user.Password); err != nil {
 		s.log.Error("Check date error", zap.Error(err))
-		return user, err
+		return 0, err
 	}
 
 	if err := matchesPattern(user.Email, common.EmailRX); err != nil {
-		return user, err
+		return 0, err
 	}
 
 	passwdHash, err := generatePasswordHash(user.Password)
 	if err != nil {
 		s.log.Error("Passwd hash error", zap.Error(err))
-		return user, err
+		return 0, err
 	}
 
 	user.Password = passwdHash
 
-	userId, err := s.user.CreateUser(ctx, user)
+	userID, err := s.user.CreateUser(ctx, user)
 	if err != nil {
 		s.log.Error("Service error", zap.Error(err))
-		return user, err
+		return 0, err
 	}
 
-	user.ID = userId
-
-	return user, nil
+	return userID, nil
 }
 
 func (s *UserService) UpdateUserFIO(ctx context.Context, user model.UserUpdateFIO) (int, error) {
@@ -97,7 +95,7 @@ func (s *UserService) UpdateUserPassword(ctx context.Context, userUP model.UserU
 	}
 
 	// Насколько это правельно вызывать внутни сервиса другой сервис???
-	user, err := s.GetUserById(ctx, userUP.ID)
+	user, err := s.GetUserByID(ctx, userUP.ID)
 	if err != nil {
 		return 0, err
 	}
@@ -120,10 +118,10 @@ func (s *UserService) UpdateUserPassword(ctx context.Context, userUP model.UserU
 	return s.user.UpdateUserPassword(ctx, userUP)
 }
 
-func (s *UserService) DeleteUser(ctx context.Context, userId int) error {
+func (s *UserService) DeleteUser(ctx context.Context, userID int) error {
 	// Можно сделать чтобы пользователь ввел пароль
 	// и проверять сответствие пароля перед тем удалять пользователя
-	return s.user.DeleteUser(ctx, userId)
+	return s.user.DeleteUser(ctx, userID)
 }
 
 func generatePasswordHash(passwd string) (string, error) {

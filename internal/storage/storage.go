@@ -9,7 +9,7 @@ import (
 )
 
 type IUserStorage interface {
-	GetUserById(ctx context.Context, userID int) (model.User, error)
+	GetUserByID(ctx context.Context, userID int) (model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 
 	CreateUser(ctx context.Context, user model.User) (int, error)
@@ -21,7 +21,7 @@ type IUserStorage interface {
 }
 
 type IBookStorage interface {
-	GetBookById(ctx context.Context, bookID int) (model.Book, error)
+	GetBookByID(ctx context.Context, bookID int) (model.Book, error)
 	GetAllBooks(ctx context.Context) ([]model.Book, error)
 	CreateBook(ctx context.Context, book model.Book) (int, error)
 	UpdateBook(ctx context.Context, book model.Book) (int, error)
@@ -29,8 +29,8 @@ type IBookStorage interface {
 }
 
 type IBIHistoryStorage interface {
-	GetBIHistory(ctx context.Context) ([]model.BIHistory, error)
-	GetBIHistoryLM(ctx context.Context) ([]model.BIHistory, error)
+	GetCurrentBorrowedBooks(ctx context.Context) ([]model.BIHistory, error)
+	GetBIHistoryLastMonth(ctx context.Context) ([]model.BIHistory, error)
 	CreateBIHistory(ctx context.Context, bIHistory model.BIHistory) (int, error)
 	UpdateBIHistory(ctx context.Context, bIHistory model.BIHistory) (int, error)
 }

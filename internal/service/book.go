@@ -8,7 +8,7 @@ import (
 )
 
 type IBookStorage interface {
-	GetBookById(ctx context.Context, bookID int) (model.Book, error)
+	GetBookByID(ctx context.Context, bookID int) (model.Book, error)
 	GetAllBooks(ctx context.Context) ([]model.Book, error)
 	CreateBook(ctx context.Context, book model.Book) (int, error)
 	UpdateBook(ctx context.Context, book model.Book) (int, error)
@@ -20,23 +20,16 @@ type BookService struct {
 	log  *zap.Logger
 }
 
-func (s *BookService) CreateBook(ctx context.Context, book model.Book) (model.Book, error) {
+func (s *BookService) CreateBook(ctx context.Context, book model.Book) (int, error) {
 	// проверка валидности данных
-	bookId, err := s.book.CreateBook(ctx, book)
-	if err != nil {
-		return book, err
-	}
-
-	book.ID = bookId
-
-	return book, nil
+	return s.book.CreateBook(ctx, book)
 }
 
-func (s *BookService) GetBookById(ctx context.Context, bookId int) (model.Book, error) {
-	return s.book.GetBookById(ctx, bookId)
+func (s *BookService) GetBookByID(ctx context.Context, bookId int) (model.Book, error) {
+	return s.book.GetBookByID(ctx, bookId)
 }
 
-func (s *BookService) GetBooks(ctx context.Context) ([]model.Book, error) {
+func (s *BookService) GetAllBooks(ctx context.Context) ([]model.Book, error) {
 	return s.book.GetAllBooks(ctx)
 }
 
