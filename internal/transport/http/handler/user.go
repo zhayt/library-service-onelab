@@ -14,12 +14,9 @@ import (
 type IUserService interface {
 	GetUserByID(ctx context.Context, userID int) (model.User, error)
 	GetUserByEmail(ctx context.Context, login model.UserLogin) (model.User, error)
-
 	CreateUser(ctx context.Context, user model.User) (int, error)
-
 	UpdateUserFIO(ctx context.Context, user model.UserUpdateFIO) (int, error)
 	UpdateUserPassword(ctx context.Context, user model.UserUpdatePassword) (int, error)
-
 	DeleteUser(ctx context.Context, userID int) error
 }
 

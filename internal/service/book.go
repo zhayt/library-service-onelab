@@ -20,6 +20,10 @@ type BookService struct {
 	log  *zap.Logger
 }
 
+func NewBookService(log *zap.Logger, book IBookStorage) *BookService {
+	return &BookService{book: book, log: log}
+}
+
 func (s *BookService) CreateBook(ctx context.Context, book model.Book) (int, error) {
 	// проверка валидности данных
 	return s.book.CreateBook(ctx, book)
@@ -41,8 +45,4 @@ func (s *BookService) UpdateBook(ctx context.Context, book model.Book) (int, err
 
 func (s *BookService) DeleteBook(ctx context.Context, bookId int) error {
 	return s.book.DeleteBook(ctx, bookId)
-}
-
-func NewBookService(log *zap.Logger, book storage.IBookStorage) *BookService {
-	return &BookService{book: book, log: log}
 }
