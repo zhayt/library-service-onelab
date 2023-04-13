@@ -10,17 +10,19 @@ import (
 const _timeoutContext = 5 * time.Second
 
 type Handler struct {
-	log  *zap.Logger
-	user IUserService
-	book IBookService
-	mid  *middleware.JWTAuth
+	log     *zap.Logger
+	user    IUserService
+	book    IBookService
+	history IBIHistoryService
+	mid     *middleware.JWTAuth
 }
 
 func NewHandler(logger *zap.Logger, service *service.Service, auth *middleware.JWTAuth) *Handler {
 	return &Handler{
-		log:  logger,
-		user: service,
-		book: service,
-		mid:  auth,
+		log:     logger,
+		user:    service,
+		book:    service,
+		history: service,
+		mid:     auth,
 	}
 }
