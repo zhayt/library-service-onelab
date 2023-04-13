@@ -30,7 +30,16 @@ func (r *BIHistoryStorage) CreateBIHistory(ctx context.Context, bIHistory model.
 	return int(bihId), nil
 }
 
-	if err := r.db.SelectContext(ctx, &bIHistories, qr); err != nil {
+func (r *BIHistoryStorage) GetCurrentBorrowedBooks(ctx context.Context) ([]model.BorrowedBooks, error) {
+	qr := `SELECT book_issue_history.id, u.fio, b.name, b.author, created_at FROM 
+           book_issue_history
+		   INNER JOIN "user" u on u.id = book_issue_history.user_id
+		   INNER JOIN book b on b.id = book_issue_history.book_id
+           WHERE return_date IS NULL`
+
+	var borrowedBooks []model.BorrowedBooks
+
+	if err := r.db.SelectContext(ctx, &borrowedBooks, qr); err != nil {
 		return nil, fmt.Errorf("couldn't teke book issue history: %w", err)
 	}
 
