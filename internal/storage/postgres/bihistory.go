@@ -36,7 +36,7 @@ func (r *BIHistoryStorage) GetBIHistoryLastMonth(ctx context.Context) ([]model.B
 	var bIHistories []model.BIHistory
 
 	if err := r.db.SelectContext(ctx, &bIHistories, qr); err != nil {
-		return bIHistories, fmt.Errorf("cannot take book issue history for last month: %w", err)
+		return bIHistories, fmt.Errorf("couldn't take book issue history for last month: %w", err)
 	}
 
 	return bIHistories, nil
@@ -64,4 +64,14 @@ func (r *BIHistoryStorage) UpdateBIHistory(ctx context.Context, bIHistory model.
 	}
 
 	return int(bihId), nil
+}
+
+func (r *BIHistoryStorage) DeleteBIHistory(ctx context.Context, bIHistoryID int) error {
+	qr := `DELETE FROM book_issue_history WHERE id = $1`
+
+	if _, err := r.db.ExecContext(ctx, qr, bIHistoryID); err != nil {
+		return fmt.Errorf("couldn't delete book ID#%v: %w", bIHistoryID, err)
+	}
+
+	return nil
 }
