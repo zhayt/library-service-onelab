@@ -25,6 +25,11 @@ type IBookService interface {
 }
 
 type IBIHistoryService interface {
+	CreateBIHistory(ctx context.Context, history model.BIHistory) (int, error)
+	GetCurrentBorrowedBooks(ctx context.Context) ([]model.BorrowedBooks, error)
+	GetBIHistoryLastMonth(ctx context.Context) ([]model.BorrowedBooks, error)
+	UpdateBIHistory(ctx context.Context, bIHistoryID int) (int, error)
+	DeleteBIHistory(ctx context.Context, bIHistoryID int) error
 }
 
 type Service struct {
@@ -35,7 +40,8 @@ type Service struct {
 
 func NewService(logger *zap.Logger, storage *storage.Storage) *Service {
 	return &Service{
-		IUserService: NewUserService(logger, storage),
-		IBookService: NewBookService(logger, storage),
+		IUserService:      NewUserService(logger, storage),
+		IBookService:      NewBookService(logger, storage),
+		IBIHistoryService: NewBIHistory(logger, storage),
 	}
 }
