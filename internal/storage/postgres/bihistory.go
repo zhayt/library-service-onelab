@@ -53,7 +53,7 @@ func (r *BIHistoryStorage) GetBIHistoryLastMonth(ctx context.Context) ([]model.B
 		   INNER JOIN book b on b.id = book_issue_history.book_id
 		   WHERE created_at >= NOW() - INTERVAL '1 month' AND return_date IS NULL;`
 
-	var bIHistories []model.BIHistory
+	var bIHistories []model.BorrowedBooks
 
 	if err := r.db.SelectContext(ctx, &bIHistories, qr); err != nil {
 		return bIHistories, fmt.Errorf("couldn't take book issue history for last month: %w", err)
