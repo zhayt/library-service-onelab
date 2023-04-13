@@ -11,12 +11,9 @@ import (
 type IUserStorage interface {
 	GetUserByID(ctx context.Context, userID int) (model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
-
 	CreateUser(ctx context.Context, user model.User) (int, error)
-
 	UpdateUserFIO(ctx context.Context, user model.UserUpdateFIO) (int, error)
 	UpdateUserPassword(ctx context.Context, user model.UserUpdatePassword) (int, error)
-
 	DeleteUser(ctx context.Context, userID int) error
 }
 
@@ -29,10 +26,11 @@ type IBookStorage interface {
 }
 
 type IBIHistoryStorage interface {
-	GetCurrentBorrowedBooks(ctx context.Context) ([]model.BIHistory, error)
-	GetBIHistoryLastMonth(ctx context.Context) ([]model.BIHistory, error)
+	GetCurrentBorrowedBooks(ctx context.Context) ([]model.BorrowedBooks, error)
+	GetBIHistoryLastMonth(ctx context.Context) ([]model.BorrowedBooks, error)
 	CreateBIHistory(ctx context.Context, bIHistory model.BIHistory) (int, error)
-	UpdateBIHistory(ctx context.Context, bIHistory model.BIHistory) (int, error)
+	UpdateBIHistory(ctx context.Context, bIHistoryID int) (int, error)
+	DeleteBIHistory(ctx context.Context, bIHistoryID int) error
 }
 
 type Storage struct {
