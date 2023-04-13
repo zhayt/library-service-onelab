@@ -77,7 +77,32 @@ func (h *Handler) ShowBooks(e echo.Context) error {
 }
 
 func (h *Handler) UpdateBook(e echo.Context) error {
-	return nil
+	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
+	defer cancel()
+
+	bookID, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		h.log.Error("Param error", zap.Error(err))
+		return e.JSON(http.StatusNotFound, err)
+	}
+
+	var book model.Book
+	if err := e.Bind(&book); err != nil {
+		h.log.Error("Bind error", zap.Error(err))
+		return e.JSON(http.StatusBadRequest, err)
+	}
+
+	book.ID = bookID
+
+	bookID, err = h.book.UpdateBook(ctx, book)
+	if err != nil {
+		h.log.Error("Update book error", zap.Error(err))
+		// 500 or 400
+		return e.JSON(http.StatusInternalServerError, err)
+	}
+
+	h.log.Info("Book updated", zap.Int("id", bookID))
+	return e.JSON(http.StatusOK, bookID)
 }
 
 func (h *Handler) DeleteBook(e echo.Context) error {
