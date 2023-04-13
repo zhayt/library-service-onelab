@@ -12,10 +12,10 @@ import (
 )
 
 type IUserService interface {
-	GetUserById(ctx context.Context, userID int) (model.User, error)
+	GetUserByID(ctx context.Context, userID int) (model.User, error)
 	GetUserByEmail(ctx context.Context, login model.UserLogin) (model.User, error)
 
-	CreateUser(ctx context.Context, user model.User) (model.User, error)
+	CreateUser(ctx context.Context, user model.User) (int, error)
 
 	UpdateUserFIO(ctx context.Context, user model.UserUpdateFIO) (int, error)
 	UpdateUserPassword(ctx context.Context, user model.UserUpdatePassword) (int, error)
@@ -33,13 +33,15 @@ func (h *Handler) SignUp(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, err)
 	}
 
-	user, err := h.user.CreateUser(ctx, user)
+	userID, err := h.user.CreateUser(ctx, user)
 	if err != nil {
 		h.log.Error("Create user error", zap.Error(err))
 		return e.JSON(http.StatusBadRequest, err)
 	}
 
-	h.log.Info("User created", zap.Int("id", user.ID))
+	user.ID = userID
+
+	h.log.Info("User created", zap.Int("id", userID))
 
 	return e.JSON(http.StatusOK, user)
 }
@@ -82,9 +84,9 @@ func (h *Handler) ShowUser(e echo.Context) error {
 		return e.JSON(http.StatusNotFound, err)
 	}
 
-	user, err := h.user.GetUserById(ctx, userID)
+	user, err := h.user.GetUserByID(ctx, userID)
 	if err != nil {
-		h.log.Error("GetUserById error", zap.Error(err))
+		h.log.Error("GetUserByID error", zap.Error(err))
 		return e.JSON(http.StatusNotFound, err)
 	}
 
@@ -92,11 +94,11 @@ func (h *Handler) ShowUser(e echo.Context) error {
 	return e.JSON(http.StatusOK, user)
 }
 
-func (h *Handler) UpdateUser(e echo.Context) error {
+func (h *Handler) UpdateUserFIO(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
 
-	userId, err := getUserId(e)
+	userID, err := getUserID(e)
 	if err != nil {
 		h.log.Error("Authorization error", zap.Error(err))
 		return e.JSON(http.StatusUnauthorized, err)
@@ -109,23 +111,23 @@ func (h *Handler) UpdateUser(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, err)
 	}
 
-	userdata.ID = userId
+	userdata.ID = userID
 
-	userId, err = h.user.UpdateUserFIO(ctx, userdata)
+	userID, err = h.user.UpdateUserFIO(ctx, userdata)
 	if err != nil {
 		h.log.Error("UpdateUserFIO error", zap.Error(err))
 		return e.JSON(http.StatusBadRequest, err)
 	}
 
-	h.log.Info("User fio updated", zap.Int("id", userId))
-	return e.JSON(http.StatusOK, userId)
+	h.log.Info("User FIO has been changed", zap.Int("id", userID))
+	return e.JSON(http.StatusOK, userID)
 }
 
 func (h *Handler) UpdateUserPassword(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
 
-	userId, err := getUserId(e)
+	userID, err := getUserID(e)
 	if err != nil {
 		h.log.Error("Authorization error", zap.Error(err))
 		return e.JSON(http.StatusUnauthorized, err)
@@ -138,45 +140,43 @@ func (h *Handler) UpdateUserPassword(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, err)
 	}
 
-	userPasswd.ID = userId
+	userPasswd.ID = userID
 
-	userId, err = h.user.UpdateUserPassword(ctx, userPasswd)
+	userID, err = h.user.UpdateUserPassword(ctx, userPasswd)
 	if err != nil {
 		// will be Server or Client error
 		h.log.Error("UpdateUserPassword error", zap.Error(err))
 		return e.JSON(http.StatusBadRequest, err)
 	}
 
-	h.log.Info("User password updated", zap.Int("id", userId))
-	return e.JSON(http.StatusOK, userId)
+	h.log.Info("User password has been changed", zap.Int("id", userID))
+	return e.JSON(http.StatusOK, userID)
 }
 
 func (h *Handler) DeleteUser(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
 
-	userId, err := getUserId(e)
+	userID, err := getUserID(e)
 	if err != nil {
 		h.log.Error("Authorization error", zap.Error(err))
 		return e.JSON(http.StatusUnauthorized, err)
 	}
 
-	if err = h.user.DeleteUser(ctx, userId); err != nil {
+	if err = h.user.DeleteUser(ctx, userID); err != nil {
 		h.log.Error("DeleteUser error")
 		return e.JSON(http.StatusBadRequest, err)
 	}
 
-	h.log.Info("User deleted", zap.Int("id", userId))
-	return e.JSON(http.StatusOK, userId)
+	h.log.Info("User deleted", zap.Int("id", userID))
+	return e.JSON(http.StatusOK, userID)
 }
 
-func getUserId(e echo.Context) (int, error) {
-	id := e.Request().Context().Value(model.ContextUserID)
-
-	idInt, ok := id.(int)
+func getUserID(e echo.Context) (int, error) {
+	id, ok := e.Request().Context().Value(model.ContextUserID).(int)
 	if !ok {
 		return 0, errors.New("user id is of invalid type")
 	}
 
-	return idInt, nil
+	return id, nil
 }
