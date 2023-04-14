@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/zhayt/user-storage-service/internal/common"
 	"github.com/zhayt/user-storage-service/internal/model"
 	"github.com/zhayt/user-storage-service/internal/storage"
 	"go.uber.org/zap"
@@ -12,6 +11,11 @@ import (
 	"net/mail"
 	"regexp"
 	"strings"
+)
+
+var (
+	EmailRX        = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	ErrInvalidData = errors.New("invalid data")
 )
 
 type IUserStorage interface {
@@ -58,7 +62,7 @@ func (s *UserService) CreateUser(ctx context.Context, user model.User) (int, err
 		return 0, err
 	}
 
-	if err := matchesPattern(user.Email, common.EmailRX); err != nil {
+	if err := matchesPattern(user.Email, EmailRX); err != nil {
 		return 0, err
 	}
 
@@ -141,7 +145,7 @@ func checkDate(minLen, maxLen int, data ...string) error {
 	for _, d := range data {
 		d = strings.TrimSpace(d)
 		if len([]rune(d)) < minLen && len([]rune(d)) > maxLen {
-			return common.ErrInvalidData
+			return ErrInvalidData
 		}
 	}
 
@@ -150,14 +154,14 @@ func checkDate(minLen, maxLen int, data ...string) error {
 
 func matchesPattern(value string, pattern *regexp.Regexp) error {
 	if value == "" {
-		return common.ErrInvalidData
+		return ErrInvalidData
 	}
 	_, err := mail.ParseAddress(value)
 	if err != nil {
-		return common.ErrInvalidData
+		return ErrInvalidData
 	}
 	if !pattern.MatchString(value) {
-		return common.ErrInvalidData
+		return ErrInvalidData
 	}
 
 	return nil
