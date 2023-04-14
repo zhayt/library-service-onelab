@@ -25,14 +25,14 @@ func (h *Handler) CreateBook(e echo.Context) error {
 
 	if err := e.Bind(&book); err != nil {
 		h.log.Error("Bind error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, err)
+		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
 	}
 
 	bookID, err := h.book.CreateBook(ctx, book)
 	if err != nil {
 		// server or client error
 		h.log.Error("Create book error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, err)
+		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
 	}
 
 	book.ID = bookID
@@ -48,14 +48,14 @@ func (h *Handler) ShowBook(e echo.Context) error {
 	bookID, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		h.log.Error("Param error", zap.Error(err))
-		return e.JSON(http.StatusNotFound, err)
+		return e.JSON(http.StatusNotFound, makeResponse(err.Error()))
 	}
 
 	book, err := h.book.GetBookByID(ctx, bookID)
 	if err != nil {
 		h.log.Error("Get book Id error", zap.Error(err))
 		// 500 or 404
-		return e.JSON(http.StatusNotFound, err)
+		return e.JSON(http.StatusNotFound, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Book found", zap.Int("id", book.ID))
@@ -69,7 +69,7 @@ func (h *Handler) ShowAllBooks(e echo.Context) error {
 	books, err := h.book.GetAllBooks(ctx)
 	if err != nil {
 		h.log.Error("Get all books error", zap.Error(err))
-		return e.JSON(http.StatusInternalServerError, err)
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Books founded", zap.Int("amount", len(books)))
@@ -83,13 +83,14 @@ func (h *Handler) UpdateBook(e echo.Context) error {
 	bookID, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		h.log.Error("Param error", zap.Error(err))
-		return e.JSON(http.StatusNotFound, err)
+		return e.JSON(http.StatusNotFound, makeResponse(err.Error()))
 	}
 
 	var book model.Book
-	if err := e.Bind(&book); err != nil {
+
+	if err = e.Bind(&book); err != nil {
 		h.log.Error("Bind error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, err)
+		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
 	}
 
 	book.ID = bookID
@@ -98,11 +99,11 @@ func (h *Handler) UpdateBook(e echo.Context) error {
 	if err != nil {
 		h.log.Error("Update book error", zap.Error(err))
 		// 500 or 400
-		return e.JSON(http.StatusInternalServerError, err)
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Book updated", zap.Int("id", bookID))
-	return e.JSON(http.StatusOK, bookID)
+	return e.JSON(http.StatusOK, makeResponse(bookID))
 }
 
 func (h *Handler) DeleteBook(e echo.Context) error {
@@ -112,14 +113,14 @@ func (h *Handler) DeleteBook(e echo.Context) error {
 	bookID, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		h.log.Error("Param error", zap.Error(err))
-		return e.JSON(http.StatusNotFound, err)
+		return e.JSON(http.StatusNotFound, makeResponse(err.Error()))
 	}
 
 	if err = h.book.DeleteBook(ctx, bookID); err != nil {
 		h.log.Error("Delete book error", zap.Error(err))
-		return e.JSON(http.StatusInternalServerError, err)
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Book deleted", zap.Int("id", bookID))
-	return e.JSON(http.StatusOK, bookID)
+	return e.JSON(http.StatusOK, makeResponse(bookID))
 }

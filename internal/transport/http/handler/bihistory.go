@@ -24,13 +24,13 @@ func (h *Handler) CreateBIHistory(e echo.Context) error {
 	userID, err := getUserID(e)
 	if err != nil {
 		h.log.Error("Authorization error", zap.Error(err))
-		return e.JSON(http.StatusUnauthorized, err)
+		return e.JSON(http.StatusUnauthorized, makeResponse(err.Error()))
 	}
 
 	var bIHistory model.BIHistory
 	if err = e.Bind(&bIHistory); err != nil {
 		h.log.Error("Bind error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, err)
+		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
 	}
 
 	bIHistory.UserID = userID
@@ -38,11 +38,11 @@ func (h *Handler) CreateBIHistory(e echo.Context) error {
 	bIHistoryID, err := h.history.CreateBIHistory(ctx, bIHistory)
 	if err != nil {
 		h.log.Error("Create book issue history error", zap.Error(err))
-		return e.JSON(http.StatusInternalServerError, err)
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Book issue history has been created", zap.Int("id", bIHistoryID))
-	return e.JSON(http.StatusOK, bIHistoryID)
+	return e.JSON(http.StatusOK, makeResponse(bIHistoryID))
 }
 
 func (h *Handler) ShowCurrentBorrowedBooks(e echo.Context) error {
@@ -52,7 +52,7 @@ func (h *Handler) ShowCurrentBorrowedBooks(e echo.Context) error {
 	borrowedBooks, err := h.history.GetCurrentBorrowedBooks(ctx)
 	if err != nil {
 		h.log.Error("Get current borrowed books error", zap.Error(err))
-		return e.JSON(http.StatusInternalServerError, err)
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Showed current borrowed books", zap.Int("amount", len(borrowedBooks)))
@@ -66,10 +66,10 @@ func (h *Handler) ShowBIHistoryLastMonth(e echo.Context) error {
 	borrowedBooks, err := h.history.GetBIHistoryLastMonth(ctx)
 	if err != nil {
 		h.log.Error("Get book issue history last month error", zap.Error(err))
-		return e.JSON(http.StatusInternalServerError, err)
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
-	h.log.Info("Showed borrowed books in last month", zap.Int("amont", len(borrowedBooks)))
+	h.log.Info("Showed borrowed books in last month", zap.Int("amount", len(borrowedBooks)))
 	return e.JSON(http.StatusOK, borrowedBooks)
 }
 
@@ -80,16 +80,16 @@ func (h *Handler) UpdateBIHistory(e echo.Context) error {
 	bIHistoryID, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		h.log.Error("Param error", zap.Error(err))
-		return e.JSON(http.StatusNotFound, err)
+		return e.JSON(http.StatusNotFound, makeResponse(err.Error()))
 	}
 
 	if _, err = h.history.UpdateBIHistory(ctx, bIHistoryID); err != nil {
 		h.log.Error("Update book issue history error", zap.Int("id", bIHistoryID))
-		return e.JSON(http.StatusInternalServerError, err)
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Book issue history has been updated", zap.Int("id", bIHistoryID))
-	return e.JSON(http.StatusOK, bIHistoryID)
+	return e.JSON(http.StatusOK, makeResponse(bIHistoryID))
 }
 
 func (h *Handler) DeleteBIHistory(e echo.Context) error {
@@ -99,14 +99,14 @@ func (h *Handler) DeleteBIHistory(e echo.Context) error {
 	bIHistoryID, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		h.log.Error("Param error", zap.Error(err))
-		return e.JSON(http.StatusNotFound, err)
+		return e.JSON(http.StatusNotFound, makeResponse(err.Error()))
 	}
 
 	if err = h.history.DeleteBIHistory(ctx, bIHistoryID); err != nil {
 		h.log.Error("Delete book issue history error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, err)
+		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Book issue history has been deleted", zap.Int("id", bIHistoryID))
-	return e.JSON(http.StatusOK, bIHistoryID)
+	return e.JSON(http.StatusOK, makeResponse(bIHistoryID))
 }
