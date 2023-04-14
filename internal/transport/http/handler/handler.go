@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/zhayt/user-storage-service/internal/model"
 	"github.com/zhayt/user-storage-service/internal/service"
 	"github.com/zhayt/user-storage-service/internal/transport/http/middleware"
 	"go.uber.org/zap"
@@ -25,4 +26,8 @@ func NewHandler(logger *zap.Logger, service *service.Service, auth *middleware.J
 		history: service,
 		mid:     auth,
 	}
+}
+
+func makeResponse(msg interface{}) *model.Response {
+	return &model.Response{Message: msg}
 }
