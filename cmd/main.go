@@ -1,11 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/zhayt/user-storage-service/config"
 	"github.com/zhayt/user-storage-service/internal/service"
 	"github.com/zhayt/user-storage-service/internal/storage"
-	"github.com/zhayt/user-storage-service/internal/storage/postgres"
 	"github.com/zhayt/user-storage-service/internal/transport/http"
 	"github.com/zhayt/user-storage-service/internal/transport/http/handler"
 	"github.com/zhayt/user-storage-service/internal/transport/http/middleware"
@@ -48,13 +48,12 @@ func run() error {
 	}(l)
 
 	// storage
-	db, err := postgres.NewConnectionPool("pgx", cfg.DBConnectionURL)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	repo := storage.NewStorage(l, db)
+	var wg sync.WaitGroup
+
+	repo := storage.NewStorage(ctx, &wg, l, cfg)
 
 	// service
 	serv := service.NewService(l, repo)
@@ -85,6 +84,9 @@ func run() error {
 	if err = server.Shutdown(); err != nil {
 		return fmt.Errorf("error while shutting down server: %s", err)
 	}
+
+	cancel()
+	wg.Wait()
 
 	return nil
 }
