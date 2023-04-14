@@ -17,6 +17,18 @@ type IBookService interface {
 	DeleteBook(ctx context.Context, bookID int) error
 }
 
+// CreateBook godoc
+// @Summary		Create-book
+// @Tags		book
+// @Description	create book
+// @ID			create-book
+// @Accept		json
+// @Produce		json
+// @Param		input	body		model.Book	true	"book info"
+// @Success		200		{object}	model.Book
+// @Failure		400		{object}	model.Response
+// @Failure		500		{object}	model.Response
+// @Router		/books [post]
 func (h *Handler) CreateBook(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -32,7 +44,7 @@ func (h *Handler) CreateBook(e echo.Context) error {
 	if err != nil {
 		// server or client error
 		h.log.Error("Create book error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	book.ID = bookID
@@ -41,6 +53,17 @@ func (h *Handler) CreateBook(e echo.Context) error {
 	return e.JSON(http.StatusOK, book)
 }
 
+// ShowBook godoc
+// @Summary		Show book
+// @Tags		book
+// @Description	show book
+// @ID			show-book
+// @Produce		json
+// @Param		id	path		integer	true	"BookID"
+// @Success		200		{object}	model.Book
+// @Failure		400		{object}	model.Response
+// @Failure		500		{object}	model.Response
+// @Router		/books/{id} [get]
 func (h *Handler) ShowBook(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -62,6 +85,15 @@ func (h *Handler) ShowBook(e echo.Context) error {
 	return e.JSON(http.StatusOK, book)
 }
 
+// ShowAllBooks godoc
+// @Summary		Show all books
+// @Tags		book
+// @Description	show books
+// @ID			show-books
+// @Produce		json
+// @Success		200		{object}	[]model.Book
+// @Failure		500		{object}	model.Response
+// @Router		/books [get]
 func (h *Handler) ShowAllBooks(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -76,6 +108,19 @@ func (h *Handler) ShowAllBooks(e echo.Context) error {
 	return e.JSON(http.StatusOK, books)
 }
 
+// UpdateBook godoc
+// @Summary		Update book
+// @Tags		book
+// @Description	update books
+// @ID			update-book
+// @Accept		json
+// @Produce		json
+// @Param		input	body		model.Book	true "book info"
+// @Success		200		{object}	model.Book
+// @Success		400		{object}	model.Book
+// @Failure		404		{object}	model.Response
+// @Failure		500		{object}	model.Response
+// @Router		/books/{id} [patch]
 func (h *Handler) UpdateBook(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -106,6 +151,17 @@ func (h *Handler) UpdateBook(e echo.Context) error {
 	return e.JSON(http.StatusOK, makeResponse(bookID))
 }
 
+// DeleteBook godoc
+// @Summary		Delete book
+// @Tags		book
+// @Description	delete books
+// @ID			delete-book
+// @Produce		json
+// @Param		id	path		integer	true	"BookID"
+// @Success		200		{object}	model.Book
+// @Success		404		{object}	model.Book
+// @Failure		500		{object}	model.Response
+// @Router		/books/{id} [delete]
 func (h *Handler) DeleteBook(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()

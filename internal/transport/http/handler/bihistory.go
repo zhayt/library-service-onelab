@@ -17,6 +17,20 @@ type IBIHistoryService interface {
 	DeleteBIHistory(ctx context.Context, bIHistoryID int) error
 }
 
+// CreateBIHistory godoc
+// @Summary		rent book
+// @Security	ApiKeyAuth
+// @Tags		book-issue-history
+// @Description	create note about rent book
+// @ID			rent-book
+// @Accept		json
+// @Produce		json
+// @Param		input	body		model.BIHistory	true	"book issue info"
+// @Success		200		{object}	model.Response
+// @Success		401		{object}	model.Response
+// @Failure		400		{object}	model.Response
+// @Failure		500		{object}	model.Response
+// @Router		/rents [post]
 func (h *Handler) CreateBIHistory(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -45,6 +59,15 @@ func (h *Handler) CreateBIHistory(e echo.Context) error {
 	return e.JSON(http.StatusOK, makeResponse(bIHistoryID))
 }
 
+// ShowCurrentBorrowedBooks godoc
+// @Summary		show current borrowed books
+// @Tags		book-issue-history
+// @Description	show current borrowed books
+// @ID			show-rent-book
+// @Produce		json
+// @Success		200		{object}	[]model.BorrowedBooks
+// @Failure		500		{object}	model.Response
+// @Router		/rents [get]
 func (h *Handler) ShowCurrentBorrowedBooks(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -59,6 +82,15 @@ func (h *Handler) ShowCurrentBorrowedBooks(e echo.Context) error {
 	return e.JSON(http.StatusOK, borrowedBooks)
 }
 
+// ShowBIHistoryLastMonth godoc
+// @Summary		show borrowed books in last month
+// @Tags		book-issue-history
+// @Description	show borrowed books in last month
+// @ID			show-rent-book-lm
+// @Produce		json
+// @Success		200		{object}	[]model.BorrowedBooks
+// @Failure		500		{object}	model.Response
+// @Router		/rents/months [get]
 func (h *Handler) ShowBIHistoryLastMonth(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -73,6 +105,17 @@ func (h *Handler) ShowBIHistoryLastMonth(e echo.Context) error {
 	return e.JSON(http.StatusOK, borrowedBooks)
 }
 
+// UpdateBIHistory godoc
+// @Summary		update book issue history
+// @Tags		book-issue-history
+// @Description	update book issue history book returned
+// @ID			update-biHistory
+// @Produce		json
+// @Param 		id	path		integer	true	"BIHistoryID"
+// @Success		200		{object}	[]model.BorrowedBooks
+// @Failure		404		{object}	model.Response
+// @Failure		500		{object}	model.Response
+// @Router		/rents/{id} [patch]
 func (h *Handler) UpdateBIHistory(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -92,6 +135,17 @@ func (h *Handler) UpdateBIHistory(e echo.Context) error {
 	return e.JSON(http.StatusOK, makeResponse(bIHistoryID))
 }
 
+// DeleteBIHistory godoc
+// @Summary		delete book issue history
+// @Tags		book-issue-history
+// @Description	delete book issue history
+// @ID			delete-biHistory
+// @Produce		json
+// @Param		id	path		integer	true	"BIHistoryID"
+// @Success		200		{object}	model.Response
+// @Failure		404		{object}	model.Response
+// @Failure		500		{object}	model.Response
+// @Router		/rents/{id} [delete]
 func (h *Handler) DeleteBIHistory(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -104,7 +158,7 @@ func (h *Handler) DeleteBIHistory(e echo.Context) error {
 
 	if err = h.history.DeleteBIHistory(ctx, bIHistoryID); err != nil {
 		h.log.Error("Delete book issue history error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	h.log.Info("Book issue history has been deleted", zap.Int("id", bIHistoryID))

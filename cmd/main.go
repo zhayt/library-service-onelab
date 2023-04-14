@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/zhayt/user-storage-service/config"
+	_ "github.com/zhayt/user-storage-service/docs"
 	"github.com/zhayt/user-storage-service/internal/service"
 	"github.com/zhayt/user-storage-service/internal/storage"
 	"github.com/zhayt/user-storage-service/internal/transport/http"
@@ -18,6 +19,19 @@ import (
 	"syscall"
 )
 
+//	@title			OneLab HomeWork API
+//	@version		1.0
+//	@description	API service for User Storage.
+//	@description	Where they can create, retrieve, update, delete books.
+//  @description	And can rent these books
+//	@termsOfService	http://swagger.io/terms/
+
+//	@host		localhost:8000
+//	@BasePath	/api/v1
+
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						Authorization
 func main() {
 	if err := run(); err != nil {
 		return

@@ -1,0 +1,541 @@
+basePath: /api/v1
+definitions:
+  model.BIHistory:
+    properties:
+      bookID:
+        type: integer
+      id:
+        type: integer
+      issueDate:
+        type: string
+      returnDate:
+        type: string
+      userID:
+        type: integer
+    type: object
+  model.Book:
+    properties:
+      author:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  model.BorrowedBooks:
+    properties:
+      bookAuthor:
+        type: string
+      bookName:
+        type: string
+      id:
+        type: integer
+      issueDate:
+        type: string
+      userName:
+        type: string
+    type: object
+  model.Response:
+    properties:
+      message: {}
+    type: object
+  model.User:
+    properties:
+      email:
+        type: string
+      fio:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+    type: object
+  model.UserLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  model.UserUpdateFIO:
+    properties:
+      fio:
+        type: string
+      id:
+        type: integer
+    type: object
+  model.UserUpdatePassword:
+    properties:
+      currentPassword:
+        type: string
+      id:
+        type: integer
+      newPassword:
+        type: string
+      newPasswordRepeat:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: |-
+    API service for User Storage.
+    Where they can create, retrieve, update, delete books.
+    And can rent these books
+  termsOfService: http://swagger.io/terms/
+  title: OneLab HomeWork API
+  version: "1.0"
+paths:
+  /books:
+    get:
+      description: show books
+      operationId: show-books
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Book'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Show all books
+      tags:
+      - book
+    post:
+      consumes:
+      - application/json
+      description: create book
+      operationId: create-book
+      parameters:
+      - description: book info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Book'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Book'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Create-book
+      tags:
+      - book
+  /books/{id}:
+    delete:
+      description: delete books
+      operationId: delete-book
+      parameters:
+      - description: BookID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Book'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Book'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Delete book
+      tags:
+      - book
+    get:
+      description: show book
+      operationId: show-book
+      parameters:
+      - description: BookID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Book'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Show book
+      tags:
+      - book
+    patch:
+      consumes:
+      - application/json
+      description: update books
+      operationId: update-book
+      parameters:
+      - description: book info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Book'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Book'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Book'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Update book
+      tags:
+      - book
+  /rents:
+    get:
+      description: show current borrowed books
+      operationId: show-rent-book
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.BorrowedBooks'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: show current borrowed books
+      tags:
+      - book-issue-history
+    post:
+      consumes:
+      - application/json
+      description: create note about rent book
+      operationId: rent-book
+      parameters:
+      - description: book issue info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.BIHistory'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: rent book
+      tags:
+      - book-issue-history
+  /rents/{id}:
+    delete:
+      description: delete book issue history
+      operationId: delete-biHistory
+      parameters:
+      - description: BIHistoryID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: delete book issue history
+      tags:
+      - book-issue-history
+    patch:
+      description: update book issue history book returned
+      operationId: update-biHistory
+      parameters:
+      - description: BIHistoryID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.BorrowedBooks'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: update book issue history
+      tags:
+      - book-issue-history
+  /rents/months:
+    get:
+      description: show borrowed books in last month
+      operationId: show-rent-book-lm
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.BorrowedBooks'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: show borrowed books in last month
+      tags:
+      - book-issue-history
+  /users/{id}:
+    get:
+      description: show user information
+      operationId: get-user
+      parameters:
+      - description: UserID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: ShowUser
+      tags:
+      - user
+  /users/settings/password:
+    patch:
+      description: update user password
+      operationId: update-user-passwd
+      parameters:
+      - description: user info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserUpdatePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateUser
+      tags:
+      - user
+  /users/settings/profile:
+    delete:
+      description: delete user
+      operationId: delete-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete User
+      tags:
+      - user
+    patch:
+      description: update user FIO
+      operationId: update-user-fio
+      parameters:
+      - description: user info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserUpdateFIO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdateUser
+      tags:
+      - user
+  /users/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: authorization
+      operationId: login
+      parameters:
+      - description: credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: SignIn
+      tags:
+      - user
+  /users/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: create account
+      operationId: create-user
+      parameters:
+      - description: user info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Sign-Up
+      tags:
+      - user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

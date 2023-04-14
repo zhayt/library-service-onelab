@@ -20,6 +20,18 @@ type IUserService interface {
 	DeleteUser(ctx context.Context, userID int) error
 }
 
+//		SignUp godoc
+//	 	@Summary		Sign-Up
+//		@Tags			user
+//		@Description	create account
+//		@ID				create-user
+//		@Accept			json
+//		@Produce		json
+//		@Param			input	body		model.User	true	"user info"
+//		@Success		200		{object}	model.Response
+//		@Failure		400		{object}	model.Response
+//		@Failure		500		{object}	model.Response
+//		@Router			/users/sign-up [post]
 func (h *Handler) SignUp(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -33,7 +45,7 @@ func (h *Handler) SignUp(e echo.Context) error {
 	userID, err := h.user.CreateUser(ctx, user)
 	if err != nil {
 		h.log.Error("Create user error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	user.ID = userID
@@ -43,6 +55,18 @@ func (h *Handler) SignUp(e echo.Context) error {
 	return e.JSON(http.StatusOK, user)
 }
 
+//	 SignIn godoc
+//		@Summary		SignIn
+//		@Tags			user
+//		@Description	authorization
+//		@ID				login
+//		@Accept			json
+//		@Produce		json
+//		@Param			input	body		model.UserLogin	true	"credentials"
+//		@Success		200		{string}	string			"token"
+//		@Failure		400		{object}	model.Response
+//		@Failure		500		{object}	model.Response
+//		@Router			/users/sign-in [post]
 func (h *Handler) SignIn(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -71,6 +95,17 @@ func (h *Handler) SignIn(e echo.Context) error {
 	})
 }
 
+// ShowUser godoc
+//
+//	@Summary		ShowUser
+//	@Tags			user
+//	@Description	show user information
+//	@ID				get-user
+//	@Produce		json
+//	@Param			id	path		integer	true	"UserID"
+//	@Success		200	{object}	model.User
+//	@Failure		404	{object}	model.Response
+//	@Router			/users/{id} [get]
 func (h *Handler) ShowUser(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -91,6 +126,20 @@ func (h *Handler) ShowUser(e echo.Context) error {
 	return e.JSON(http.StatusOK, user)
 }
 
+// UpdateUserFIO godoc
+//
+//	@Summary		UpdateUser
+//	@Security		ApiKeyAuth
+//	@Tags			user
+//	@Description	update user FIO
+//	@ID				update-user-fio
+//	@Reduce			json
+//	@Produce		json
+//	@Param			input	body		model.UserUpdateFIO	true	"user info"
+//	@Success		200		{object}	model.Response
+//	@Failure		401		{object}	model.Response
+//	@Failure		500		{object}	model.Response
+//	@Router			/users/settings/profile [patch]
 func (h *Handler) UpdateUserFIO(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -113,13 +162,28 @@ func (h *Handler) UpdateUserFIO(e echo.Context) error {
 	userID, err = h.user.UpdateUserFIO(ctx, userdata)
 	if err != nil {
 		h.log.Error("UpdateUserFIO error", zap.Error(err))
-		return e.JSON(http.StatusBadRequest, makeResponse(err.Error()))
+		return e.JSON(http.StatusInternalServerError, makeResponse(err.Error()))
 	}
 
 	h.log.Info("User FIO has been changed", zap.Int("id", userID))
 	return e.JSON(http.StatusOK, makeResponse(userID))
 }
 
+// UpdateUserPassword godoc
+//
+//	@Summary		UpdateUser
+//	@Security		ApiKeyAuth
+//	@Tags			user
+//	@Description	update user password
+//	@ID				update-user-passwd
+//	@Reduce			json
+//	@Produce		json
+//	@Param			input	body		model.UserUpdatePassword	true	"user info"
+//	@Success		200		{object}	model.Response
+//	@Failure		400		{object}	model.Response
+//	@Failure		401		{object}	model.Response
+//	@Failure		500		{object}	model.Response
+//	@Router			/users/settings/password [patch]
 func (h *Handler) UpdateUserPassword(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()
@@ -150,6 +214,17 @@ func (h *Handler) UpdateUserPassword(e echo.Context) error {
 	return e.JSON(http.StatusOK, makeResponse(userID))
 }
 
+// DeleteUser godoc
+// @Summary		Delete User
+// @Security	ApiKeyAuth
+// @Tags		user
+// @Description	delete user
+// @ID			delete-user
+// @Produce		json
+// @Success		200	{object}	model.Response
+// @Failure		400	{object}	model.Response
+// @Failure		401	{object}	model.Response
+// @Router		/users/settings/profile [delete]
 func (h *Handler) DeleteUser(e echo.Context) error {
 	ctx, cancel := context.WithTimeout(e.Request().Context(), _timeoutContext)
 	defer cancel()

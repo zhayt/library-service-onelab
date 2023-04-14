@@ -2,13 +2,15 @@ package http
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/swaggo/echo-swagger"
 	"net/http"
 )
 
 func (s *Server) SetUpRoute() {
 	v1 := s.App.Group("/api/v1")
 
-	v1.GET("/live", func(e echo.Context) error {
+	s.App.GET("/swagger/*", echoSwagger.EchoWrapHandler())
+	s.App.GET("/live", func(e echo.Context) error {
 		return e.NoContent(http.StatusOK)
 	})
 
