@@ -1,13 +1,24 @@
-version: '3.1'
+version: "3.9"
+
+networks:
+  internal:
+    external: false
+
+volumes:
+  loan-api_data:
 
 services:
   postgres:
     image: postgres:alpine
     restart: always
+    volumes:
+      - loan-api_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: "onelab_db"
-      POSTGRES_USER: "onelab"
-      POSTGRES_PASSWORD: "qwerty"
+      - POSTGRES_DB=onelab_db
+      - POSTGRES_USER=onelab
+      - POSTGRES_PASSWORD=qwerty
+    networks:
+      - internal
     ports:
       - "5432:5432"
 
@@ -26,9 +37,28 @@ services:
   app:
     build: .
     restart: always
-    environment:
-      APP_PORT: 8080
     ports:
-      - "8000:8000"
+      - "8586:8000"
+    environment:
+      - APP_PORT=8000
+      - APP_MODE=dev
+      - JWT_KEY=qwerty
+      - TZ=Asia/Almaty
+      - PG_HOST=postgres
+      - PG_NAME=onelab_db
+      - PG_USER=onelab
+      - PG_PASSWORD=qwerty
+      - PG_PORT=5432
+    networks:
+      - internal
     depends_on:
+      - postgres
       - migration
+      - redis
+
+  redis:
+    image: redis:alpine
+    networks:
+      - internal
+    ports:
+      - "6379:6379"

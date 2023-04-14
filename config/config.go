@@ -27,6 +27,7 @@ type (
 		DBUser     string `env:"PG_USER" envDefault:"onelab"`
 		DBName     string `env:"PG_NAME" envDefault:"onelab_db"`
 		DBPassword string `env:"PG_PASSWORD"`
+		TZ         string `env:"TZ" envDefault:"Asia/Almaty"`
 	}
 )
 
@@ -49,6 +50,6 @@ func PrepareEnv() {
 }
 
 func makeURL(cfg *Config) string {
-	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
-		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s",
+		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort, cfg.TZ)
 }
