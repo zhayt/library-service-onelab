@@ -11,7 +11,7 @@ import (
 
 const _timeOut = 5 * time.Second
 
-func NewConnectionPool(driver string, dsn string) (*sqlx.DB, error) {
+func Dial(driver string, dsn string) (*sqlx.DB, error) {
 	db, err := sqlx.Open(driver, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("connot open db: %w", err)
