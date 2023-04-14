@@ -2,10 +2,12 @@ package storage
 
 import (
 	"context"
-	"github.com/jmoiron/sqlx"
+	"github.com/zhayt/user-storage-service/config"
 	"github.com/zhayt/user-storage-service/internal/model"
 	"github.com/zhayt/user-storage-service/internal/storage/postgres"
 	"go.uber.org/zap"
+	"log"
+	"sync"
 )
 
 type IUserStorage interface {
@@ -39,7 +41,25 @@ type Storage struct {
 	IBIHistoryStorage
 }
 
-func NewStorage(logger *zap.Logger, db *sqlx.DB) *Storage {
+func NewStorage(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, cfg *config.Config) *Storage {
+	db, err := postgres.Dial("pgx", cfg.DBConnectionURL)
+	if err != nil {
+		logger.Error("Dial error", zap.Error(err))
+		log.Fatal(err)
+	}
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			logger.Info("Close db pool connection")
+			if err := db.Close(); err != nil {
+				logger.Error("Close poll connection error", zap.Error(err))
+			}
+		}
+	}()
+
 	return &Storage{
 		IUserStorage:      postgres.NewUserStorage(db, logger),
 		IBookStorage:      postgres.NewBookStorage(db, logger),
