@@ -2,12 +2,12 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/zhayt/user-storage-service/config"
 	"github.com/zhayt/user-storage-service/internal/transport/http/handler"
 	middleware2 "github.com/zhayt/user-storage-service/internal/transport/http/middleware"
-	"net"
 	"time"
 )
 
@@ -50,7 +50,7 @@ func (s *Server) Start() {
 	s.App = s.BuildingEngine()
 	s.SetUpRoute()
 	go func() {
-		s.notify <- s.App.Start(net.JoinHostPort(s.cfg.AppHost, s.cfg.AppPort))
+		s.notify <- s.App.Start(fmt.Sprintf(":%s", s.cfg.AppPort))
 		close(s.notify)
 	}()
 }

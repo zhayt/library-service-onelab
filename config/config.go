@@ -17,7 +17,6 @@ type (
 	}
 
 	HTTP struct {
-		AppHost string `env:"APP_HOST" envDefault:"localhost"`
 		AppPort string `env:"APP_PORT" envDefault:"8080"`
 	}
 

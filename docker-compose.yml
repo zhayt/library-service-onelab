@@ -2,17 +2,17 @@ version: "3.9"
 
 networks:
   internal:
-    external: false
+    driver: bridge
 
 volumes:
-  loan-api_data:
+  pg_data:
 
 services:
   postgres:
     image: postgres:alpine
     restart: always
     volumes:
-      - loan-api_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=onelab_db
       - POSTGRES_USER=onelab
@@ -38,9 +38,8 @@ services:
     build: .
     restart: always
     ports:
-      - "8586:8000"
+      - "8000:8000"
     environment:
-      - APP_PORT=8000
       - APP_MODE=dev
       - JWT_KEY=qwerty
       - TZ=Asia/Almaty
