@@ -33,7 +33,7 @@
 - Офорлменная swagger документация
 
 ### Сущности
-![Screenshot_2023-04-08_04-54-55.png](..%2F..%2FDiplomka%2Fschema%2FScreenshot_2023-04-08_04-54-55.png)
+![Image Alt](https://user-images.githubusercontent.com/100071536/232201315-9b0b62a5-f969-46b7-891c-305992debcda.png)
 # Как запустить
 Убедитесь, что находитесь в корневом директории проекта, и введите комаду в терминал:
 ```shell
