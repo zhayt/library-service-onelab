@@ -14,9 +14,9 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=onelab_db
-      - POSTGRES_USER=onelab
-      - POSTGRES_PASSWORD=qwerty
+      - POSTGRES_DB=${PG_NAME}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
     networks:
       - internal
     ports:
@@ -40,14 +40,15 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - APP_MODE=dev
-      - JWT_KEY=qwerty
+      - APP_MODE=${APP_MODE}
+      - APP_PORT=${APP_PORT}
+      - JWT_KEY=${JWT_KEY}
       - TZ=Asia/Almaty
       - PG_HOST=postgres
-      - PG_NAME=onelab_db
-      - PG_USER=onelab
-      - PG_PASSWORD=qwerty
-      - PG_PORT=5432
+      - PG_NAME=${PG_NAME}
+      - PG_USER=${PG_USER}
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_PORT=${PG_PORT}
     networks:
       - internal
     depends_on:
