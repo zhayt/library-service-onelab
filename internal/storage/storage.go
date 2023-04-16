@@ -6,7 +6,6 @@ import (
 	"github.com/zhayt/user-storage-service/internal/model"
 	"github.com/zhayt/user-storage-service/internal/storage/postgres"
 	"go.uber.org/zap"
-	"log"
 	"sync"
 )
 
@@ -41,11 +40,11 @@ type Storage struct {
 	IBIHistoryStorage
 }
 
-func NewStorage(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, cfg *config.Config) *Storage {
+func NewStorage(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, cfg *config.Config) (*Storage, error) {
 	db, err := postgres.Dial("pgx", cfg.DBConnectionURL)
 	if err != nil {
 		logger.Error("Dial error", zap.Error(err))
-		log.Fatal(err)
+		return nil, err
 	}
 
 	wg.Add(1)
@@ -55,7 +54,7 @@ func NewStorage(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, cfg
 		case <-ctx.Done():
 			logger.Info("Close db pool connection")
 			if err := db.Close(); err != nil {
-				logger.Error("Close poll connection error", zap.Error(err))
+				logger.Error("Close pool connection error", zap.Error(err))
 			}
 		}
 	}()
@@ -64,5 +63,5 @@ func NewStorage(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, cfg
 		IUserStorage:      postgres.NewUserStorage(db, logger),
 		IBookStorage:      postgres.NewBookStorage(db, logger),
 		IBIHistoryStorage: postgres.NewBIHistory(db, logger),
-	}
+	}, nil
 }

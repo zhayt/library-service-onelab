@@ -67,7 +67,10 @@ func run() error {
 
 	var wg sync.WaitGroup
 
-	repo := storage.NewStorage(ctx, &wg, l, cfg)
+	repo, err := storage.NewStorage(ctx, &wg, l, cfg)
+	if err != nil {
+		return err
+	}
 
 	// service
 	serv := service.NewService(l, repo)
