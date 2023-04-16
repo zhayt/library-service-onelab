@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zhayt/user-storage-service/internal/model"
-	"github.com/zhayt/user-storage-service/internal/storage"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"net/mail"
@@ -21,17 +20,14 @@ var (
 type IUserStorage interface {
 	GetUserByID(ctx context.Context, userID int) (model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
-
 	CreateUser(ctx context.Context, user model.User) (int, error)
-
 	UpdateUserFIO(ctx context.Context, user model.UserUpdateFIO) (int, error)
 	UpdateUserPassword(ctx context.Context, user model.UserUpdatePassword) (int, error)
-
 	DeleteUser(ctx context.Context, userID int) error
 }
 
 type UserService struct {
-	user storage.IUserStorage
+	user IUserStorage
 	log  *zap.Logger
 }
 
