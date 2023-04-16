@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"github.com/zhayt/user-storage-service/internal/model"
-	"github.com/zhayt/user-storage-service/internal/storage"
 	"go.uber.org/zap"
 )
 
@@ -16,7 +15,7 @@ type IBookStorage interface {
 }
 
 type BookService struct {
-	book storage.IBookStorage
+	book IBookStorage
 	log  *zap.Logger
 }
 
