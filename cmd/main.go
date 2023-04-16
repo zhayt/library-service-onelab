@@ -81,7 +81,7 @@ func run() error {
 	// server
 	server := http.NewServer(cfg, hand, mid)
 
-	l.Info("Start server", zap.String("host", cfg.AppHost), zap.String("port", cfg.AppPort))
+	l.Info("Start server")
 	server.Start()
 
 	// grace full shutdown
