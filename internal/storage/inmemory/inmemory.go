@@ -2,10 +2,15 @@ package inmemory
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/zhayt/user-storage-service/internal/common"
 	"github.com/zhayt/user-storage-service/internal/model"
 	"sync"
+)
+
+var (
+	ErrUserNotExists = errors.New("user not exists")
+	ErrNameTaken     = errors.New("couldn't add user, id taken")
 )
 
 type UserStorage struct {
@@ -25,7 +30,7 @@ func (r *UserStorage) GetUserById(ctx context.Context, id int) (model.User, erro
 	defer r.mu.RUnlock()
 	user, ok := r.storage[id]
 	if !ok {
-		return user, fmt.Errorf("cannot take user: %w", common.ErrUserNotExists)
+		return user, fmt.Errorf("cannot take user: %w", ErrUserNotExists)
 	}
 
 	return user, nil
@@ -47,7 +52,7 @@ func (r *UserStorage) CreateUser(ctx context.Context, user model.User) (int, err
 	defer r.mu.Unlock()
 	r.id++
 	if _, ok := r.storage[r.id]; ok {
-		return 0, fmt.Errorf("cannot create user: %w", common.ErrNameTaken)
+		return 0, fmt.Errorf("cannot create user: %w", ErrNameTaken)
 	}
 
 	r.storage[r.id] = user
@@ -60,7 +65,7 @@ func (r *UserStorage) UpdateUser(ctx context.Context, user model.User) (int, err
 	defer r.mu.Unlock()
 
 	if _, ok := r.storage[user.ID]; !ok {
-		return 0, fmt.Errorf("cannot update user: %w", common.ErrUserNotExists)
+		return 0, fmt.Errorf("cannot update user: %w", ErrUserNotExists)
 	}
 
 	r.storage[user.ID] = user
@@ -73,7 +78,7 @@ func (r *UserStorage) DeleteUser(ctx context.Context, id int) error {
 	defer r.mu.Unlock()
 
 	if _, ok := r.storage[id]; !ok {
-		return fmt.Errorf("cannot delete user: %w", common.ErrUserNotExists)
+		return fmt.Errorf("cannot delete user: %w", ErrUserNotExists)
 	}
 
 	delete(r.storage, id)
