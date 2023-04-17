@@ -17,6 +17,7 @@ var (
 	ErrInvalidData = errors.New("invalid data")
 )
 
+//go:generate mockery --name IUserStorage
 type IUserStorage interface {
 	GetUserByID(ctx context.Context, userID int) (model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
