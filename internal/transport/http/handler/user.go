@@ -11,6 +11,7 @@ import (
 	"strconv"
 )
 
+//go:generate mockery --name IUserService
 type IUserService interface {
 	GetUserByID(ctx context.Context, userID int) (model.User, error)
 	GetUserByEmail(ctx context.Context, login model.UserLogin) (model.User, error)
