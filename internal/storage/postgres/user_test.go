@@ -10,6 +10,7 @@ import (
 	"github.com/zhayt/user-storage-service/config"
 	"github.com/zhayt/user-storage-service/internal/model"
 	"github.com/zhayt/user-storage-service/logger"
+	"go.uber.org/zap"
 	"log"
 	"os"
 	"testing"
@@ -29,9 +30,7 @@ func TestUserStorage_GetUserByEmail(t *testing.T) {
 		{"email not exists", args{context.Background(), "notexistsemail@mail.ru"}, true},
 	}
 
-	// init logger and up test db container
-	l, _ := logger.Init(&config.Config{Level: "dev"})
-
+	// up test db container and get pool connection
 	dbContainer, db, err := SetupTestDatabase()
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +42,7 @@ func TestUserStorage_GetUserByEmail(t *testing.T) {
 
 			r := &UserStorage{
 				db:  db,
-				log: l,
+				log: zap.NewExample(),
 			}
 
 			_, err = r.GetUserByEmail(tt.args.ctx, tt.args.email)

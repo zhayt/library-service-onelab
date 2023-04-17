@@ -53,7 +53,6 @@ func TestUserService_CreateUser(t *testing.T) {
 		{name: "invalid email", args: args{ctx: nil, user: model.User{FIO: "I don't have email", Email: "invalid@mailru", Password: "sad"}}, want: 0, wantErr: true},
 	}
 
-	l, _ := zap.NewDevelopment()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userStorage := mocks.NewIUserStorage(t)
@@ -74,7 +73,7 @@ func TestUserService_CreateUser(t *testing.T) {
 
 			s := &UserService{
 				user: userStorage,
-				log:  l,
+				log:  zap.NewExample(),
 			}
 			got, err := s.CreateUser(tt.args.ctx, tt.args.user)
 			if (err != nil) != tt.wantErr {
