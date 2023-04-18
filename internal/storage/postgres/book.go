@@ -41,10 +41,10 @@ func (r *BookStorage) GetAllBooks(ctx context.Context) ([]model.Book, error) {
 }
 
 func (r *BookStorage) CreateBook(ctx context.Context, book model.Book) (int, error) {
-	qr := `INSERT INTO book (name, author) VALUES($1, $2) RETURNING id`
+	qr := `INSERT INTO book (name, author, price) VALUES($1, $2, $3) RETURNING id`
 
 	var bookID int64
-	if err := r.db.GetContext(ctx, &bookID, qr, book.Name, book.Author); err != nil {
+	if err := r.db.GetContext(ctx, &bookID, qr, book.Name, book.Author, book.Price); err != nil {
 		return 0, fmt.Errorf("couldn't create book: %w", err)
 	}
 
@@ -52,11 +52,11 @@ func (r *BookStorage) CreateBook(ctx context.Context, book model.Book) (int, err
 }
 
 func (r *BookStorage) UpdateBook(ctx context.Context, book model.Book) (int, error) {
-	qr := `UPDATE book SET name = $2, author = $3 WHERE id = $1 RETURNING id`
+	qr := `UPDATE book SET name = $2, author = $3, price = $4 WHERE id = $1 RETURNING id`
 
 	var bookId int64
 
-	if err := r.db.GetContext(ctx, &bookId, qr, book.ID, book.Name, book.Author); err != nil {
+	if err := r.db.GetContext(ctx, &bookId, qr, book.ID, book.Name, book.Author, book.Price); err != nil {
 		return 0, fmt.Errorf("couldn't update book id#%v: %w", book.ID, err)
 	}
 
