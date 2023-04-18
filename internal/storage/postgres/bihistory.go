@@ -17,19 +17,34 @@ func NewBIHistory(db *sqlx.DB, logger *zap.Logger) *BIHistoryStorage {
 	return &BIHistoryStorage{db: db, log: logger}
 }
 
-func (r *BIHistoryStorage) CreateBIHistory(ctx context.Context, bIHistory model.BIHistory) (int, error) {
-	qr := `INSERT INTO book_issue_history (book_id, user_id) 
-		   VALUES ($1, $2) RETURNING id`
-
-	var bihId int64
-
-	err := r.db.GetContext(ctx, &bihId, qr, bIHistory.BookID, bIHistory.UserID)
+func (r *BIHistoryStorage) CreateBIHistory(ctx context.Context, bIHistory model.BIHistory) error {
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return 0, fmt.Errorf("couldn't create book issue history: %w", err)
+		return fmt.Errorf("couldn't create book issue history: %w", err)
 	}
-	return int(bihId), nil
-}
 
+	stmt, err := tx.PrepareContext(ctx, `INSERT INTO book_issue_history (book_id, quantity, user_id) 
+		   VALUES ($1, $2, $3)`)
+
+	if err != nil {
+		return fmt.Errorf("couldn't prepare query: %w", err)
+	}
+
+	for _, book := range bIHistory.Books {
+		if _, err := stmt.ExecContext(ctx, book.ID, book.Quantity, bIHistory.UserID); err != nil {
+			if err = tx.Rollback(); err != nil {
+				return err
+			}
+			return fmt.Errorf("couldn't execute query: %w", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("couldn't commit transaction: %w", err)
+	}
+
+	return nil
+}
 func (r *BIHistoryStorage) GetCurrentBorrowedBooks(ctx context.Context) ([]model.BorrowedBooks, error) {
 	qr := `SELECT book_issue_history.id, u.fio, b.name, b.author, created_at FROM 
            book_issue_history
