@@ -55,7 +55,7 @@ services:
       - postgres
       - redis
 
-  postgres-transaction:
+  postgres2:
     image: postgres:alpine
     restart: always
     volumes:
@@ -67,7 +67,7 @@ services:
     networks:
       - internal
     ports:
-      - "5433:5432"
+      - "5430:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U onelab -d onelab_db" ]
       interval: 10s
@@ -81,9 +81,10 @@ services:
       - "8081:8081"
     environment:
       - APP_MODE=dev
+      - APP_PORT=8081
       - JWT_KEY=qwerty
       - TZ=Asia/Almaty
-      - DB_HOST=postgres
+      - DB_HOST=postgres2
       - DB_NAME=onelab_db
       - DB_USER=onelab
       - DB_PASSWORD=qwerty
@@ -92,7 +93,7 @@ services:
       - internal
     depends_on:
       - app
-      - postgres-transaction
+      - postgres2
 
 
   redis:
