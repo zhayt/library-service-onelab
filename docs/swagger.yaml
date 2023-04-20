@@ -21,10 +21,10 @@ definitions:
         type: string
       id:
         type: integer
-      name:
-        type: string
       price:
         type: number
+      title:
+        type: string
     type: object
   model.BorrowedBooks:
     properties:

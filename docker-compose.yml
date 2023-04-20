@@ -8,11 +8,11 @@ volumes:
   pg_data:
 
 services:
-  postgres-library:
+  postgres:
     image: postgres:alpine
     restart: always
     volumes:
-      - ./migrations-db-library:/docker-entrypoint-initdb.d/
+      - ./internal/storage/postgres/migrations:/docker-entrypoint-initdb.d/
       - pg_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=onelab_db
@@ -28,35 +28,26 @@ services:
       timeout: 5s
       retries: 5
 
-  postgres-transaction:
-    image: postgres:alpine
-    restart: always
-    volumes:
-      - ./migrations-db-transaction:/docker-entrypoint-initdb.d/
-      - pg_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=onelab_db
-      - POSTGRES_USER=onelab
-      - POSTGRES_PASSWORD=qwerty
-    networks:
-      - internal
-    ports:
-      - "5433:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U onelab -d onelab_db" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   adminer:
     image: adminer
     restart: always
     ports:
       - "8080:8080"
 
-  app-library:
-    build:
-      context:
+  migration:
+    image: migrate/migrate
+    command: -path /migrations/ -database 'postgres://onelab:qwerty@postgres:5432/onelab_db?sslmode=disable' up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./internal/storage/postgres/migrations:/migrations/
+    networks:
+      - internal
+
+
+  app:
+    build: .
     restart: always
     ports:
       - "8000:8000"
@@ -76,8 +67,25 @@ services:
       - migration
       - redis
 
-  app-transaction:
-    build: .
+  postgres-transaction:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=onelab_db
+      - POSTGRES_USER=onelab
+      - POSTGRES_PASSWORD=qwerty
+    networks:
+      - internal
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U onelab -d onelab_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  transaction:
+    image: zhaisanbay/transaction-service:onelab
     restart: always
     ports:
       - "8081:8081"
@@ -85,17 +93,17 @@ services:
       - APP_MODE=dev
       - JWT_KEY=qwerty
       - TZ=Asia/Almaty
-      - PG_HOST=postgres
-      - PG_NAME=onelab_db
-      - PG_USER=onelab
-      - PG_PASSWORD=qwerty
-      - PG_PORT=5433
+      - DB_HOST=postgres
+      - DB_NAME=onelab_db
+      - DB_USER=onelab
+      - DB_PASSWORD=qwerty
+      - DB_PORT=5432
     networks:
       - internal
     depends_on:
-      - postgres
-      - migration
-      - redis
+      - app
+      - postgres-transaction
+
 
   redis:
     image: redis:alpine
