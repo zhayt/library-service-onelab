@@ -12,7 +12,7 @@ services:
     image: postgres:alpine
     restart: always
     volumes:
-      - ./internal/storage/postgres/migrations:/docker-entrypoint-initdb.d/
+      - ./db-setup/app-db:/docker-entrypoint-initdb.d/
       - pg_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=onelab_db
@@ -34,17 +34,6 @@ services:
     ports:
       - "8080:8080"
 
-  migration:
-    image: migrate/migrate
-    command: -path /migrations/ -database 'postgres://onelab:qwerty@postgres:5432/onelab_db?sslmode=disable' up
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - ./internal/storage/postgres/migrations:/migrations/
-    networks:
-      - internal
-
 
   app:
     build: .
@@ -64,12 +53,13 @@ services:
       - internal
     depends_on:
       - postgres
-      - migration
       - redis
 
   postgres-transaction:
     image: postgres:alpine
     restart: always
+    volumes:
+      - ./db-setup/transaction-db:/docker-entrypoint-initdb.d/
     environment:
       - POSTGRES_DB=onelab_db
       - POSTGRES_USER=onelab
