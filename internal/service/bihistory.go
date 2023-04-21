@@ -15,11 +15,11 @@ type IBIHistoryStorage interface {
 }
 
 type BIHistory struct {
-	history IBIHistoryService
+	history IBIHistoryStorage
 	log     *zap.Logger
 }
 
-func NewBIHistory(log *zap.Logger, history IBIHistoryService) *BIHistory {
+func NewBIHistory(log *zap.Logger, history IBIHistoryStorage) *BIHistory {
 	return &BIHistory{history: history, log: log}
 }
 
